@@ -26,6 +26,12 @@ int yyline = 1;
 WS          [ \t]
 
 %%
+
+"test" {
+	yTRACE(yyline);
+	printf("We're printing...\n");
+	}
+
 "/*"        {
               int c1      = 0;
               int c2      = yyinput();
