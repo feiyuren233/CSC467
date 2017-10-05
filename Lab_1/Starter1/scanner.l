@@ -7,8 +7,12 @@
  *  Interface to the scanner module for CSC467 course project
 
 
-Note: token seperation: identifiers and keywords must be seperated from 
-following identifier, keyword or integer; otherwise no seperation needed
+Note:
+Still to do:
+-identify errors & output with yERROR(X)
+		-out of bound ints
+		-too long ids
+-associate info w/ token eg. id name, type, first used (yyval?)
  **********************************************************************/
 
 
@@ -31,11 +35,9 @@ int tokenCount = 0;
 
 WS          [ \t]
 letter 		[A-Za-z]
-digit 		[0-9]
-sign		[+|-]
-id 			{letter}({letter}|{digit})*
-integer 	({digit}+)
-float 		{integer}(\.{digit}+)?(E{integer})?
+integer 	[0-9]+
+id 			{letter}({letter}|{integer}|_)*
+float 		{integer}(\.{integer})?(E{integer})?
 
 %%
 
@@ -63,7 +65,7 @@ rsq {yTRACE(++tokenCount); return(RSQ);}
 
 "(" {yTRACE(++tokenCount); return(LP);/*LeftParentheses*/}
 ")" {yTRACE(++tokenCount); return(RP);}
-"{" {yTRACE(++tokenCount); return(LB);/*LeftBrace Note: Does this need error checking to ensure closed?*/}
+"{" {yTRACE(++tokenCount); return(LB);/*LeftBrace*/}
 "}" {yTRACE(++tokenCount); return(RB);}
 "[" {yTRACE(++tokenCount); return(LSB);/*LeftSquareBracket*/}
 "]" {yTRACE(++tokenCount); return(RSB);}
@@ -108,7 +110,7 @@ while {yTRACE(++tokenCount); return(WHILE);}
 
 
 
-"/*"        { //this function is useless 
+"/*"        {
               int c1      = 0;
               int c2      = yyinput();
               int curline = yyline;

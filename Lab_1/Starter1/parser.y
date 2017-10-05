@@ -28,6 +28,7 @@
 void yyerror(char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
 extern int yyline;        /* variable holding current line number   */
+extern int yyval;
 
 %}
 
@@ -61,8 +62,7 @@ extern int yyline;        /* variable holding current line number   */
 }
 // TODO:Replace myToken with your tokens, you can use these tokens in flex
 %token           INT FLOAT ID WHOLEN REALN BOOL VEC2 VEC3 VEC4 BVEC2 BVEC3 BVEC4 IVEC2 IVEC3 IVEC4 CONST DP3 LIT RSQ LP
-RP LB RB LSB RSB COMMA SEMI PLUS MINUS MULT DIV EXP EQ OR AND NOT NE LT LE GT GE ASSIGN TRUEV FALSEV
-IF ELSE WHILE
+RP LB RB LSB RSB COMMA SEMI PLUS MINUS MULT DIV EXP EQ OR AND NOT NE LT LE GT GE ASSIGN TRUEV FALSEV IF ELSE WHILE
 
 
 %start    program
@@ -87,9 +87,7 @@ tokens
   ;
 // TODO: replace myToken with the token the you defined.
 token
-  :     INT
-  |		FLOAT
-  |		ID                    
+  :     INT | FLOAT | ID | WHOLEN | REALN | BOOL | VEC2 | VEC3 | VEC4 | BVEC2 | BVEC3 | BVEC4 | IVEC2 | IVEC3 | IVEC4 | CONST | DP3 | LIT | RSQ | LP| RP | LB | RB | LSB | RSB | COMMA | SEMI | PLUS | MINUS | MULT | DIV | EXP | EQ | OR | AND | NOT | NE | LT | LE | GT | GE | ASSIGN | TRUEV | FALSEV | IF | ELSE | WHILE                   
   ;
 
 
