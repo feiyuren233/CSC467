@@ -57,9 +57,10 @@ extern int yyline;        /* variable holding current line number   */
 
 %union {
   int num;
+  float fVal;
 }
 // TODO:Replace myToken with your tokens, you can use these tokens in flex
-%token           myToken1 myToken2  
+%token           INT FLOAT
 
 
 %start    program
@@ -84,8 +85,8 @@ tokens
   ;
 // TODO: replace myToken with the token the you defined.
 token
-  :     myToken1 
-  |     myToken2                     
+  :     INT
+  |		FLOAT                    
   ;
 
 

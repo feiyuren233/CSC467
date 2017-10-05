@@ -133,13 +133,13 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    myToken1 = 258,
-    myToken2 = 259
+    INT = 258,
+    FLOAT = 259
   };
 #endif
 /* Tokens.  */
-#define myToken1 258
-#define myToken2 259
+#define INT 258
+#define FLOAT 259
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -149,8 +149,9 @@ union YYSTYPE
 #line 58 "parser.y" /* yacc.c:355  */
 
   int num;
+  float fVal;
 
-#line 154 "y.tab.c" /* yacc.c:355  */
+#line 155 "y.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -167,7 +168,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 171 "y.tab.c" /* yacc.c:358  */
+#line 172 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -464,7 +465,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    79,    79,    82,    83,    87,    88
+       0,    80,    80,    83,    84,    88,    89
 };
 #endif
 
@@ -473,8 +474,8 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "myToken1", "myToken2", "$accept",
-  "program", "tokens", "token", YY_NULLPTR
+  "$end", "error", "$undefined", "INT", "FLOAT", "$accept", "program",
+  "tokens", "token", YY_NULLPTR
 };
 #endif
 
@@ -1230,7 +1231,7 @@ yyreduce:
   switch (yyn)
     {
       
-#line 1234 "y.tab.c" /* yacc.c:1646  */
+#line 1235 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1458,7 +1459,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 92 "parser.y" /* yacc.c:1906  */
+#line 93 "parser.y" /* yacc.c:1906  */
 
 
 /***********************************************************************ol

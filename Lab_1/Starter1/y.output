@@ -7,16 +7,16 @@ Grammar
     2 tokens: tokens token
     3       | %empty
 
-    4 token: myToken1
-    5      | myToken2
+    4 token: INT
+    5      | FLOAT
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
 error (256)
-myToken1 (258) 4
-myToken2 (259) 5
+INT (258) 4
+FLOAT (259) 5
 
 
 Nonterminals, with rules where they appear
@@ -53,8 +53,8 @@ State 2
     1 program: tokens .
     2 tokens: tokens . token
 
-    myToken1  shift, and go to state 4
-    myToken2  shift, and go to state 5
+    INT    shift, and go to state 4
+    FLOAT  shift, and go to state 5
 
     $default  reduce using rule 1 (program)
 
@@ -70,14 +70,14 @@ State 3
 
 State 4
 
-    4 token: myToken1 .
+    4 token: INT .
 
     $default  reduce using rule 4 (token)
 
 
 State 5
 
-    5 token: myToken2 .
+    5 token: FLOAT .
 
     $default  reduce using rule 5 (token)
 
