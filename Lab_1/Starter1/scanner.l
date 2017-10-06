@@ -95,10 +95,8 @@ if {yTRACE(++tokenCount); return(IF);}
 else {yTRACE(++tokenCount); return(ELSE);}
 while {yTRACE(++tokenCount); return(WHILE);}
 
-<<<<<<< refs/remotes/origin/master
 true {yTRACE(++tokenCount); return(TRUEV);/*TRUE VALUE*/}
 false {yTRACE(++tokenCount); return(FALSEV);}
-=======
 {integer} {yTRACE(++tokenCount);
 	   yylval.intVal = atoi(yytext);
            /*Note: Code suggested by TA yyval.ival=atoi(yytext);*/
