@@ -1,2 +1,2 @@
 # CSC467
-[sdfdCourse] - Compilers and Interpreters
+[Course] - Compilers and Interpreters
