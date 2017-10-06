@@ -98,9 +98,9 @@ while {yTRACE(++tokenCount); return(WHILE);}
 true {yTRACE(++tokenCount); return(TRUEV);/*TRUE VALUE*/}
 false {yTRACE(++tokenCount); return(FALSEV);}
 {integer} {yTRACE(++tokenCount);
-	   yylval.intVal = atoi(yytext);
+	   yylval.iVal = atoi(yytext);
            /*Note: Code suggested by TA yyval.ival=atoi(yytext);*/
-           printf("%s%d%s", "yylval.intVal == ", yylval.intVal, "\n");
+           printf("%s%d%s", "yylval.iVal == ", yylval.iVal, "\n");
            return(WHOLEN);}
 
 {float} {yTRACE(++tokenCount); return(REALN);}
