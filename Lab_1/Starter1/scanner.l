@@ -10,9 +10,9 @@
 Note:
 Still to do:
 -identify errors & output with yERROR(X)
-		-out of bound ints
-		-too long ids
--associate info w/ token eg. id name, type, first used (yyval?)
+		-out of bound ints -> [-2147483648,2147483647] => need look ahead when see neg sign?
+		-too long ids -> ambiguously 31 chars
+-associate info w/ token eg. id name, type, first used -> yyval use?
  **********************************************************************/
 
 
@@ -91,20 +91,16 @@ rsq {yTRACE(++tokenCount); return(RSQ);}
 
 "=" {yTRACE(++tokenCount); return(ASSIGN);}
 
-true {yTRACE(++tokenCount); return(TRUEV);}
-false {yTRACE(++tokenCount); return(FALSEV);}
-
 if {yTRACE(++tokenCount); return(IF);}
 else {yTRACE(++tokenCount); return(ELSE);}
-
 while {yTRACE(++tokenCount); return(WHILE);}
 
+true {yTRACE(++tokenCount); return(TRUEV);/*TRUE VALUE*/}
+false {yTRACE(++tokenCount); return(FALSEV);}
+
 {integer} {yTRACE(++tokenCount);
-			/*yylval.num=yytext;*/ return(WHOLEN);}
-
-{float} {yTRACE(++tokenCount);
-			/*yylval.fVal=yytext;*/ return(REALN);}
-
+			/*Note: Code suggested by TA yyval.ival=atoi(yytext);*/ return(WHOLEN);/*WHOLE NUMBER*/}
+{float} {yTRACE(++tokenCount); return(REALN);}
 {id} {yTRACE(++tokenCount); return(ID);}
 
 
@@ -136,8 +132,8 @@ while {yTRACE(++tokenCount); return(WHILE);}
 
 int installID(){/*to specify lexeme (token's value) 
 				including its variable type, value and location of first use?
-				returns pointer to symbol table where info stored*/}
+				returns pointer to symbol table where info stored*/ return 0;}
 
-int installNum(){/*to specify lexeme -> why is this necessary?*/}
+int installNum(){/*to specify lexeme note: why is this necessary?*/ return 0;}
 
 /**/
