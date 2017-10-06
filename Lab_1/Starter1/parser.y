@@ -57,8 +57,8 @@ extern int yyval;
 // Can access me from flex useing yyval
 
 %union {
-  int num;
-  float fVal;
+  int intVal;
+  float floatVal;
 }
 // TODO:Replace myToken with your tokens, you can use these tokens in flex
 %token           INT FLOAT ID WHOLEN REALN BOOL VEC2 VEC3 VEC4 BVEC2 BVEC3 BVEC4 IVEC2 IVEC3 IVEC4 CONST DP3 LIT RSQ LP

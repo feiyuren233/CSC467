@@ -95,11 +95,16 @@ if {yTRACE(++tokenCount); return(IF);}
 else {yTRACE(++tokenCount); return(ELSE);}
 while {yTRACE(++tokenCount); return(WHILE);}
 
+<<<<<<< refs/remotes/origin/master
 true {yTRACE(++tokenCount); return(TRUEV);/*TRUE VALUE*/}
 false {yTRACE(++tokenCount); return(FALSEV);}
-
+=======
 {integer} {yTRACE(++tokenCount);
-			/*Note: Code suggested by TA yyval.ival=atoi(yytext);*/ return(WHOLEN);/*WHOLE NUMBER*/}
+	   yylval.intVal = atoi(yytext);
+           /*Note: Code suggested by TA yyval.ival=atoi(yytext);*/
+           printf("%s%d%s", "yylval.intVal == ", yylval.intVal, "\n");
+           return(WHOLEN);}
+
 {float} {yTRACE(++tokenCount); return(REALN);}
 {id} {yTRACE(++tokenCount); return(ID);}
 
