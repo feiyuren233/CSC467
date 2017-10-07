@@ -28,7 +28,6 @@
 void yyerror(char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
 extern int yyline;        /* variable holding current line number   */
-//extern int yyval;
 
 %}
 
