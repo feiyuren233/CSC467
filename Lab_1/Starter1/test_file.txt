@@ -21,6 +21,14 @@ true false
 /* ==||&&!!=<<=>>== */ /*Don't give errors in this order
 01 1. .5
 
+/* ID's containing keywords */
+boolVal intVal floatVal /* etc. */
+valbool valint valfloat
+valboolval valintval valfloatval
+ifHas elseHas whileHas constHas
+trueSay falseNay
+
+
 /* Miscellany */
 { 
    vec4 temp;
