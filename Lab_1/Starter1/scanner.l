@@ -20,6 +20,7 @@ Still to do:
 #include "parser.tab.h"
 #include "string.h"
 
+#define MAX_ID_LENGTH 512
 
 #define YY_USER_INIT { yyin = inputFile; }
 #define	yyinput      input
@@ -113,6 +114,8 @@ false {return smartTRACE(FALSEV);}
 }
 
 {id} {
+    if (strlen(yytext) > MAX_ID_LENGTH)
+        yERROR("ERROR: Identifier exceeds maximum_length");
     yylval.sval = yytext; 
     return smartTRACE(ID);
 }

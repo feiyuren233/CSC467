@@ -1,6 +1,0 @@
-/* As per C standard integer literal, it cannot start with a zero, unless it's just zero ?? */
-/* We are not allowing octo or hex literals, which are defined in the C standard */
-integer     0|([1-9][0-9]*)
-
-/* We are forcing the presence of a digit in front and after the . (5. and .5 are not allowed) */
-float       {integer}\.{integer}([eE][+\-]?{integer})?
