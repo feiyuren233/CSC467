@@ -1,4 +1,27 @@
-int 105 5.6  /* something something something */
+bool int float
+bvec2 bvec3 bvec4
+ivec2 ivec3 ivec4
+vec2 vec3 vec4
+dp3 lit rsq
+(){}[]
+,;
++-*/^
+== || && ! != < <= > >= =
+if else while const
+true false
+/* Sample block comment */
+// Sample line comment
+
+/* Literals */
+105 0 11564
+5.6 10.3 0.9 0.45 5.0 210.0
+5.6e2 6.3E3 10.5E5 46.3e-2 30.0E-3
+
+/* Expected Errors */
+/* ==||&&!!=<<=>>== */ /*Don't give errors in this order
+01 1. .5
+
+/* Miscellany */
 { 
    vec4 temp;
 if (true){

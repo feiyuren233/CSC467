@@ -117,7 +117,11 @@ false {return smartTRACE(FALSEV);}
     return smartTRACE(ID);
 }
 
-
+"//" {
+    int ch = 0; 
+    while (ch = input(), ch != '\n' && ch != EOF) {}
+}
+	
 "/*"        {
               int c1      = 0;
               int c2      = yyinput();
