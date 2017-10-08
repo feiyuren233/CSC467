@@ -168,13 +168,13 @@ int smartTRACE(int token_t)
     int pos = 0;
     pos += sprintf(&msg[pos], "TOKEN %3d: %-6s '%s'", ++tokenCount, tokenStr(token_t), yytext);
     if (token_t == WHOLEN) {
-       pos += sprintf(&msg[pos], " %d", yylval.ival);
+       pos += sprintf(&msg[pos], " => %d", yylval.ival);
     }
     else if (token_t == REALN) {
-       pos += sprintf(&msg[pos], " %f", yylval.fval);
+       pos += sprintf(&msg[pos], " => %f", yylval.fval);
     }
     else if (token_t == ID) {
-       pos += sprintf(&msg[pos], " %s", yylval.sval);
+       pos += sprintf(&msg[pos], " => %s", yylval.sval);
     }
     fprintf(traceFile, "%s\n", msg);
 
