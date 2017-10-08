@@ -25,19 +25,22 @@ Still to do:
 #define	yyinput      input
 #define yTRACE(x)    { if (traceScanner) fprintf(traceFile, "TOKEN %3d : %s\n", x, yytext); }
 #define yERROR(x)    { fprintf(errorFile, "\nLEXICAL ERROR, LINE %d: %s\n", yyline, x); errorOccurred = TRUE; yyterminate(); }
+/* CASE_TYPE_RETURN_NAME */
+#define CTRN(t) case t: return #t;
 
-int CheckInt(void);
 int yyline = 1;
 int tokenCount = 0;
+
+const char* tokenStr(int token_t);
+int smartTRACE(int token_t);
 
 %}
 %option noyywrap
 
 WS          [ \t]
-letter 		[A-Za-z]
-integer 	[0-9]+
-id 			{letter}({letter}|{integer}|_)*
-float 		{integer}(\.{integer})?(E{integer})?
+id 	    [a-zA-Z][a-zA-Z_]*
+integer     0|([1-9][0-9]*)
+float       {integer}\.{integer}([eE][+\-]?{integer})? 
 
 %%
 
@@ -45,68 +48,74 @@ float 		{integer}(\.{integer})?(E{integer})?
 
 "\n" {yyline++;}
 
-int {yTRACE(++tokenCount); return(INT);}
-float {yTRACE(++tokenCount); return(FLOAT);}
-bool {yTRACE(++tokenCount); return(BOOL);}
-vec2 {yTRACE(++tokenCount); return(VEC2);}
-vec3 {yTRACE(++tokenCount); return(VEC3);}
-vec4 {yTRACE(++tokenCount); return(VEC4);}
-bvec2 {yTRACE(++tokenCount); return(BVEC2);}
-bvec3 {yTRACE(++tokenCount); return(BVEC3);}
-bvec4 {yTRACE(++tokenCount); return(BVEC4);}
-ivec2 {yTRACE(++tokenCount); return(IVEC2);}
-ivec3 {yTRACE(++tokenCount); return(IVEC3);}
-ivec4 {yTRACE(++tokenCount); return(IVEC4);}
-const {yTRACE(++tokenCount); return(CONST);}
+bool {return smartTRACE(BOOL);}
+int {return smartTRACE(INT);}
+float {return smartTRACE(FLOAT);}
 
-dp3 {yTRACE(++tokenCount); return(DP3);}
-lit {yTRACE(++tokenCount); return(LIT);}
-rsq {yTRACE(++tokenCount); return(RSQ);}
+bvec2 {return smartTRACE(BVEC2);}
+bvec3 {return smartTRACE(BVEC3);}
+bvec4 {return smartTRACE(BVEC4);}
+ivec2 {return smartTRACE(IVEC2);}
+ivec3 {return smartTRACE(IVEC3);}
+ivec4 {return smartTRACE(IVEC4);}
+vec2 {return smartTRACE(VEC2);}
+vec3 {return smartTRACE(VEC3);}
+vec4 {return smartTRACE(VEC4);}
 
-"(" {yTRACE(++tokenCount); return(LP);/*LeftParentheses*/}
-")" {yTRACE(++tokenCount); return(RP);}
-"{" {yTRACE(++tokenCount); return(LB);/*LeftBrace*/}
-"}" {yTRACE(++tokenCount); return(RB);}
-"[" {yTRACE(++tokenCount); return(LSB);/*LeftSquareBracket*/}
-"]" {yTRACE(++tokenCount); return(RSB);}
+dp3 {return smartTRACE(DP3);}
+lit {return smartTRACE(LIT);}
+rsq {return smartTRACE(RSQ);}
 
-"," {yTRACE(++tokenCount); return(COMMA);}
-";" {yTRACE(++tokenCount); return(SEMI);}
+"(" {return smartTRACE(LP);} /*LeftParentheses*/
+")" {return smartTRACE(RP);}
+"{" {return smartTRACE(LB);} /*LeftBrace*/
+"}" {return smartTRACE(RB);}
+"[" {return smartTRACE(LSB);} /*LeftSquareBracket*/
+"]" {return smartTRACE(RSB);}
 
-"+" {yTRACE(++tokenCount); return(PLUS);}
-"-" {yTRACE(++tokenCount); return(MINUS);}
-"*" {yTRACE(++tokenCount); return(MULT);}
-"/" {yTRACE(++tokenCount); return(DIV);}
-"^" {yTRACE(++tokenCount); return(EXP);}
+"," {return smartTRACE(COMMA);}
+";" {return smartTRACE(SEMI);}
 
-"==" {yTRACE(++tokenCount); return(EQ);}
-"||" {yTRACE(++tokenCount); return(OR);}
-"&&" {yTRACE(++tokenCount); return(AND);}
-"!" {yTRACE(++tokenCount); return(NOT);}
-"!=" {yTRACE(++tokenCount); return(NE);}
-"<" {yTRACE(++tokenCount); return(LT);}
-"<=" {yTRACE(++tokenCount); return(LE);}
-">" {yTRACE(++tokenCount); return(GT);}
-">=" {yTRACE(++tokenCount); return(GE);}
+"+" {return smartTRACE(PLUS);}
+"-" {return smartTRACE(MINUS);}
+"*" {return smartTRACE(MULT);}
+"/" {return smartTRACE(DIV);}
+"^" {return smartTRACE(EXP);}
 
-"=" {yTRACE(++tokenCount); return(ASSIGN);}
+"==" {return smartTRACE(EQ);}
+"||" {return smartTRACE(OR);}
+"&&" {return smartTRACE(AND);}
+"!" {return smartTRACE(NOT);}
+"!=" {return smartTRACE(NE);}
+"<" {return smartTRACE(LT);}
+"<=" {return smartTRACE(LE);}
+">" {return smartTRACE(GT);}
+">=" {return smartTRACE(GE);}
 
-if {yTRACE(++tokenCount); return(IF);}
-else {yTRACE(++tokenCount); return(ELSE);}
-while {yTRACE(++tokenCount); return(WHILE);}
+"=" {return smartTRACE(ASSIGN);}
 
-true {yTRACE(++tokenCount); return(TRUEV);/*TRUE VALUE*/}
-false {yTRACE(++tokenCount); return(FALSEV);}
-{integer} {yTRACE(++tokenCount);
-	   yylval.iVal = atoi(yytext);
-           /*Note: Code suggested by TA yyval.ival=atoi(yytext);*/
-           printf("%s%d%s", "yylval.iVal == ", yylval.iVal, "\n");
-           return(WHOLEN);}
+if {return smartTRACE(IF);}
+else {return smartTRACE(ELSE);}
+while {return smartTRACE(WHILE);}
+const {return smartTRACE(CONST);}
 
-{float} {yTRACE(++tokenCount); return(REALN);}
-{id} {yTRACE(++tokenCount); return(ID);}
+true {return smartTRACE(TRUEV);} /*TRUE VALUE*/
+false {return smartTRACE(FALSEV);}
 
+{integer} {
+    yylval.ival = atoi(yytext);
+    return smartTRACE(WHOLEN);
+}
 
+{float} {
+    yylval.fval = atof(yytext);
+    return smartTRACE(REALN);
+}
+
+{id} {
+    yylval.sval = yytext; 
+    return smartTRACE(ID);
+}
 
 
 "/*"        {
@@ -128,15 +137,45 @@ false {yTRACE(++tokenCount); return(FALSEV);}
               }
             }
 
-
 .           { yERROR("Unknown token"); }
 
 %%
 
-int installID(){/*to specify lexeme (token's value) 
-				including its variable type, value and location of first use?
-				returns pointer to symbol table where info stored*/ return 0;}
+const char* tokenStr(int token_t)
+{
+   /* String literals have const char* type and it's legal to return them */
+    switch(token_t) {
+        CTRN(BOOL) CTRN(INT) CTRN(FLOAT)
+	CTRN(BVEC2) CTRN(BVEC3) CTRN(BVEC4)
+	CTRN(IVEC2) CTRN(IVEC3) CTRN(IVEC4)
+	CTRN(VEC2) CTRN(VEC3) CTRN(VEC4)
+	CTRN(DP3) CTRN(LIT) CTRN(RSQ) CTRN(LP)
+	CTRN(RP) CTRN(LB) CTRN(RB) CTRN(LSB) CTRN(RSB) CTRN(COMMA) CTRN(SEMI) 
+	CTRN(PLUS) CTRN(MINUS) CTRN(MULT) CTRN(DIV) CTRN(EXP) 
+	CTRN(EQ) CTRN(OR) CTRN(AND) CTRN(NOT) CTRN(NE) CTRN(LT) CTRN(LE) CTRN(GT) CTRN(GE) 
+	CTRN(ASSIGN)
+	CTRN(IF) CTRN(ELSE) CTRN(WHILE) CTRN(CONST)
+	CTRN(TRUEV) CTRN(FALSEV) CTRN(WHOLEN) CTRN(REALN) CTRN(ID)
 
-int installNum(){/*to specify lexeme note: why is this necessary?*/ return 0;}
+	default: return "UNKNWN";
+    }
+}
 
-/**/
+int smartTRACE(int token_t) 
+{if (traceScanner) {
+
+    char msg[1024];
+    int pos = 0;
+    pos += sprintf(&msg[pos], "TOKEN %3d: %-6s '%s'", ++tokenCount, tokenStr(token_t), yytext);
+    if (token_t == WHOLEN) {
+       pos += sprintf(&msg[pos], " %d", yylval.ival);
+    }
+    else if (token_t == REALN) {
+       pos += sprintf(&msg[pos], " %f", yylval.fval);
+    }
+    else if (token_t == ID) {
+       pos += sprintf(&msg[pos], " %s", yylval.sval);
+    }
+    fprintf(traceFile, "%s\n", msg);
+
+} return token_t; }
