@@ -164,6 +164,11 @@ const char* tokenStr(int token_t)
 int smartTRACE(int token_t) 
 {if (traceScanner) {
 
+    /* This code breaks easily, of course, so add error checking!!
+     * sprintf can fail due to a bad format string or not enough space in msg
+     * Note: tokenCount is incremented in this function IF traceScanner, so if there is no tracing
+     * there we don't keep count of the number of tokens either.
+     */
     char msg[1024];
     int pos = 0;
     pos += sprintf(&msg[pos], "TOKEN %3d: %-6s '%s'", ++tokenCount, tokenStr(token_t), yytext);
