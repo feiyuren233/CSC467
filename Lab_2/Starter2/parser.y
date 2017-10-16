@@ -102,11 +102,69 @@ enum {
  *    2. Implement the trace parser option of the compiler
  ***********************************************************************/
 program
-  :   tokens       
+  :   scope     			 {yTRACE("scope");}
   ;
-tokens
-  :  tokens token  
-  |
+scope
+  :   '{' declarations statements '}'    {yTRACE("{ declarations statemetns }");}
+  ;
+declarations:				 {yTRACE("epsilon");}
+  |   declarations declaration		 {yTRACE("declarations declaration");}
+  ;
+statements:				 {yTRACE("epsilon");}
+  |   statements statement 		 {yTRACE("statements statement");}
+  ;
+declaration:				 {yTRACE("epsilon");}
+  |   type ID ';'                        {yTRACE("type ID;");}
+  |   type ID '=' expression ';'         {yTRACE("type ID = expression;");}
+  |   CONST type ID '=' expression ';'   {yTRACE("const type ID = expression;");}
+  ;
+statement
+  :   variable '=' expression ';'        {yTRACE("variable = expression;");}
+  |   IF '(' expression ')' statement else_statement {yTRACE("if (expression) stmnt else_stmnt");}
+  |   WHILE '(' expression ')' statement {yTRACE("while (expression) statement");}
+  |   scope
+  |   ';'
+  ;
+else_statement:				 {yTRACE("epsilon");}
+  |   ELSE statement			 {yTRACE("else statement");}
+  ;
+type
+  :   INT_T | IVEC_T | BOOL_T | BVEC_T | FLOAT_T | VEC_T {yTRACE("type");}
+  ;
+expression
+  :   constructor 			 {yTRACE("constructor");}
+  |   function 				 {yTRACE("function");}
+  |   INT_C			         {yTRACE("integer literal");}
+  |   FLOAT_C				 {yTRACE("floating point literal");}
+  |   variable				 {yTRACE("variable");}
+  |   unary_op expression		 {yTRACE("unvary_op expression");}
+  |   expression binary_op expression    {yTRACE("expression binary_op expression");}
+  |   TRUE_C | FALSE_C		         {yTRACE("true | false");}
+  |   '(' expression ')'                 {yTRACE("(expression)");}
+  ;
+variable
+  :   ID				 {yTRACE("ID");}
+  |   ID '[' INT_C ']'                   {yTRACE("ID[int_lit]");}
+  ;
+unary_op
+  :   '!' | '-'				 {yTRACE("Unary_op");}
+  ;
+binary_op
+  :   AND | OR | NEQ | LEQ | GEQ | EQ | '<' | '>' | '+' | '-' | '*' | '/' | '^'
+                                         {yTRACE("Binary_op");}
+  ;
+constructor
+  :   type '(' arguments ')'
+  ;
+function
+  :   FUNC '(' arguments_opt ')'         {yTRACE("function_name (arguments_opt)");}
+  ;
+arguments_opt:				 {yTRACE("epsilon");}
+  |   arguments                          {yTRACE("arguments");}
+  ;
+arguments
+  :   arguments ',' expression           {yTRACE("arguments , expression");}
+  |   expression			 {yTRACE("expression");}
   ;
 token
   : ID 
