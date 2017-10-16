@@ -1,6 +1,7 @@
 %{
 /***********************************************************************
- * --YOUR GROUP INFO SHOULD GO HERE--
+ * 	Eva Bernal 1002252313 bernalev
+ *  Ramon Sibello 999753253 sibellov
  * 
  *   Interface to the parser module for CSC467 course project.
  * 
@@ -105,15 +106,15 @@ program
   :   scope     			 {yTRACE("scope");}
   ;
 scope
-  :   '{' declarations statements '}'    {yTRACE("{ declarations statemetns }");}
+  :   '{' declarations statements '}'    {yTRACE("{ declarations statements }");}
   ;
-declarations:				 {yTRACE("epsilon");}
+declarations:				 {yTRACE("epsilon: declarations");}
   |   declarations declaration		 {yTRACE("declarations declaration");}
   ;
-statements:				 {yTRACE("epsilon");}
+statements:				 {yTRACE("epsilon: statements");}
   |   statements statement 		 {yTRACE("statements statement");}
   ;
-declaration:				 {yTRACE("epsilon");}
+declaration:				 {yTRACE("epsilon: declaration");}
   |   type ID ';'                        {yTRACE("type ID;");}
   |   type ID '=' expression ';'         {yTRACE("type ID = expression;");}
   |   CONST type ID '=' expression ';'   {yTRACE("const type ID = expression;");}
@@ -125,7 +126,7 @@ statement
   |   scope
   |   ';'
   ;
-else_statement:				 {yTRACE("epsilon");}
+else_statement:				 {yTRACE("epsilon: else_statement");}
   |   ELSE statement			 {yTRACE("else statement");}
   ;
 type
@@ -143,11 +144,11 @@ expression
   |   '(' expression ')'                 {yTRACE("(expression)");}
   ;
 variable
-  :   ID				 {yTRACE("ID");}
+  :   ID				 {fprintf(traceFile, "(%s) ", $1); yTRACE("ID");}
   |   ID '[' INT_C ']'                   {yTRACE("ID[int_lit]");}
   ;
 unary_op
-  :   '!' | '-'				 {yTRACE("Unary_op");}
+  :   '!' | '-'				 {yTRACE("Unary_op" );}
   ;
 binary_op
   :   AND | OR | NEQ | LEQ | GEQ | EQ | '<' | '>' | '+' | '-' | '*' | '/' | '^'
@@ -159,54 +160,14 @@ constructor
 function
   :   FUNC '(' arguments_opt ')'         {yTRACE("function_name (arguments_opt)");}
   ;
-arguments_opt:				 {yTRACE("epsilon");}
+arguments_opt:				 {yTRACE("epsilon: arguments_opt");}
   |   arguments                          {yTRACE("arguments");}
   ;
 arguments
   :   arguments ',' expression           {yTRACE("arguments , expression");}
   |   expression			 {yTRACE("expression");}
   ;
-token
-  : ID 
-  | AND
-  | OR
-  | NEQ
-  | LEQ
-  | GEQ
-  | EQ
-  | TRUE_C
-  | FALSE_C
-  | INT_C
-  | FLOAT_C
-  | CONST
-  | ELSE
-  | IF
-  | WHILE
-  | FLOAT_T
-  | INT_T
-  | BOOL_T
-  | VEC_T
-  | IVEC_T
-  | BVEC_T
-  | FUNC               
-  | '+'
-  | '-'
-  | '*'
-  | '/'
-  | '^'  
-  | '!'
-  | '='
-  | '<'
-  | '>'   
-  | ','
-  | ';'
-  | '('
-  | ')'
-  | '['
-  | ']'
-  | '{'
-  | '}'                                    
-  ;
+
 
 
 %%
