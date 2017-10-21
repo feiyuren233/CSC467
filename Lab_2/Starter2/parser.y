@@ -83,13 +83,18 @@ enum {
 %token <as_int>   INT_C
 %token <as_str>   ID
 
-%left     '|'
-%left     '&'
-%nonassoc '=' NEQ '<' LEQ '>' GEQ
-%left     '+' '-'
-%left     '*' '/'
-%right    '^'
-%nonassoc '!' UMINUS
+
+ 
+%left 	'['']''('')'
+%left   '-''!'
+%right 	'^'
+%left 	'*''/'
+%left 	'+''-'
+%left 	'==''!=''<''<=''>''>='
+%left	'&&'
+%left 	'||'
+
+
 
 %start    program
 
