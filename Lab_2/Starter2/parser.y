@@ -18,17 +18,18 @@
  ***********************************************************************/
 
 #include <string.h>
+#include <stdarg.h>
 #include "common.h"
 //#include "ast.h"
 //#include "symbol.h"
 //#include "semantic.h"
 #define YYERROR_VERBOSE
 #define yTRACE(x)    { if (traceParser) fprintf(traceFile, "%s\n", x); }
-#define fTRACE(format, ...) { if (traceParser) fprintf(traceFile, format"\n", __VA_ARGS__); }
 
 void yyerror(char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
 extern int yyline;        /* variable holding current line number   */
+void fTRACE(char* format, ...);
 
 enum {
   DP3 = 0, 
@@ -105,7 +106,7 @@ enum {
  *    2. Implement the trace parser option of the compiler
  ***********************************************************************/
 program
-  :   scope     			 {yTRACE("program-> scope");}
+  :   scope     			 {fTRACE("program-> scope");}
   ;
 scope
   :   '{' declarations statements '}'    {yTRACE("scope-> { declarations statements }");}
@@ -218,3 +219,16 @@ void yyerror(char* s) {
   }
 }
 
+void fTRACE(char* format, ...)
+{
+    if (traceParser) {
+        va_list args;
+        va_start(args, format);
+
+        vfprintf(traceFile, format, args);
+        
+        va_end(args);
+
+        fprintf(traceFile, "\n");
+    }
+}
