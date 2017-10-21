@@ -1,0 +1,8 @@
+{
+   int name;
+   ivec2 name;
+   bool name;
+   bvec2 name;
+   float name;
+   vec2 name;
+}
