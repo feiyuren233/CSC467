@@ -84,16 +84,14 @@ enum {
 %token <as_str>   ID
 
 
- 
-%left 	'['']''('')'
-%left   '-''!'
-%right 	'^'
-%left 	'*''/'
+%left 	"||" 
+%left	"&&"
+%left 	"==""!="'<'"<="'>'">="
 %left 	'+''-'
-%left 	'==''!=''<''<=''>''>='
-%left	'&&'
-%left 	'||'
-
+%left 	'*''/'
+%right 	'^'
+%left   UNARY
+%left 	'['']''('')'
 
 
 %start    program
@@ -143,7 +141,7 @@ expression
   |   INT_C			         {yTRACE("integer literal");}
   |   FLOAT_C				 {yTRACE("floating point literal");}
   |   variable				 {yTRACE("variable");}
-  |   unary_op expression		 {yTRACE("unvary_op expression");}
+  |   unary_op expression	%prec UNARY	 {yTRACE("unvary_op expression");}
   |   expression binary_op expression    {yTRACE("expression binary_op expression");}
   |   TRUE_C | FALSE_C		         {yTRACE("true | false");}
   |   '(' expression ')'                 {yTRACE("(expression)");}
