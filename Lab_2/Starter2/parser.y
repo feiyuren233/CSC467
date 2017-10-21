@@ -24,6 +24,7 @@
 //#include "semantic.h"
 #define YYERROR_VERBOSE
 #define yTRACE(x)    { if (traceParser) fprintf(traceFile, "%s\n", x); }
+#define enlTRACE(x)  { if (traceParser) fprintf(traceFile, "%s", x); }
 
 void yyerror(char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
@@ -84,9 +85,7 @@ enum {
 %token <as_str>   ID
 
 
-%left 	"||" 
-%left	"&&"
-%left 	"==""!="'<'"<="'>'">="
+%left 	OR AND EQ NEQ LEQ GEQ '<' '>'
 %left 	'+''-'
 %left 	'*''/'
 %right 	'^'
@@ -111,16 +110,19 @@ program
 scope
   :   '{' declarations statements '}'    {yTRACE("scope-> { declarations statements }");}
   ;
-declarations:				 {yTRACE("declarations-> declarations");}
+declarations:				 {yTRACE("declarations-> epsilon");}
   |   declarations declaration		 {yTRACE("declarations-> declarations declaration");}
   ;
 statements:				 {yTRACE("statements-> epsilon");}
   |   statements statement 		 {yTRACE("statements-> statements statement");}
   ;
 declaration:				 {yTRACE("declaration-> epsilon");}
-  |   type ID ';'                        {yTRACE("declaration-> type ID;");}
-  |   type ID '=' expression ';'         {yTRACE("declaration-> type ID = expression;");}
-  |   CONST type ID '=' expression ';'   {yTRACE("declaration-> const type ID = expression;");}
+  |   type ID ';'                        {enlTRACE("declaration-> type ID;");
+                                          enlTRACE("  ID: "); yTRACE($2);}
+  |   type ID '=' expression ';'         {enlTRACE("declaration-> type ID = expression;");
+                                          enlTRACE("  ID: "); yTRACE($2);}
+  |   CONST type ID '=' expression ';'   {yTRACE("declaration-> const type ID = expression;");
+                                          enlTRACE("  ID: "); yTRACE($3);}
   ;
 statement
   :   variable '=' expression ';'        {yTRACE("statement-> variable = expression;");}
@@ -154,8 +156,10 @@ expression
   |   '(' expression ')'                 {yTRACE("expression-> (expression)");}
   ;
 variable
-  :   ID				 {yTRACE("variable-> ID"); yTRACE($1);}
-  |   ID '[' INT_C ']'                   {yTRACE("variable-> ID[INT_C]");}
+  :   ID				 {enlTRACE("variable-> ID"); 
+                                          enlTRACE("  ID: "); yTRACE($1);}
+  |   ID '[' INT_C ']'                   {enlTRACE("variable-> ID[INT_C]");
+                                          enlTRACE("  ID: "); yTRACE($1);}
   ;
 unary_op
   :   '!' 				 {yTRACE("unary_op-> !");}

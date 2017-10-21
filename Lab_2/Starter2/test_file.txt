@@ -1,5 +1,5 @@
 /* Miscellany */
-{ 
+/*{ 
    vec4 temp;
    if (true){
       temp[0] = gl_Color[0] * gl_FragCoord[0];
@@ -11,4 +11,8 @@
       temp = gl_Color;
    }
    gl_FragColor = temp;
+}*/
+
+{
+    vec4 temp;
 }
