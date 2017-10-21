@@ -106,71 +106,78 @@ enum {
  *    2. Implement the trace parser option of the compiler
  ***********************************************************************/
 program
-  :   scope     			 {yTRACE("scope");}
+  :   scope     			 {yTRACE("program-> scope");}
   ;
 scope
-  :   '{' declarations statements '}'    {yTRACE("{ declarations statements }");}
+  :   '{' declarations statements '}'    {yTRACE("scope-> { declarations statements }");}
   ;
-declarations:				 {yTRACE("epsilon: declarations");}
-  |   declarations declaration		 {yTRACE("declarations declaration");}
+declarations:				 {yTRACE("declarations-> declarations");}
+  |   declarations declaration		 {yTRACE("declarations-> declarations declaration");}
   ;
-statements:				 {yTRACE("epsilon: statements");}
-  |   statements statement 		 {yTRACE("statements statement");}
+statements:				 {yTRACE("statements-> epsilon");}
+  |   statements statement 		 {yTRACE("statements-> statements statement");}
   ;
-declaration:				 {yTRACE("epsilon: declaration");}
-  |   type ID ';'                        {yTRACE("type ID;");}
-  |   type ID '=' expression ';'         {yTRACE("type ID = expression;");}
-  |   CONST type ID '=' expression ';'   {yTRACE("const type ID = expression;");}
+declaration:				 {yTRACE("declaration-> epsilon");}
+  |   type ID ';'                        {yTRACE("declaration-> type ID;");}
+  |   type ID '=' expression ';'         {yTRACE("declaration-> type ID = expression;");}
+  |   CONST type ID '=' expression ';'   {yTRACE("declaration-> const type ID = expression;");}
   ;
 statement
-  :   variable '=' expression ';'        {yTRACE("variable = expression;");}
-  |   IF '(' expression ')' statement else_statement {yTRACE("if (expression) stmnt else_stmnt");}
-  |   WHILE '(' expression ')' statement {yTRACE("while (expression) statement");}
-  |   scope
+  :   variable '=' expression ';'        {yTRACE("statement-> variable = expression;");}
+  |   IF '(' expression ')' statement else_statement 
+                                         {yTRACE("statement-> if (expression) stmnt else_stmnt");}
+  |   WHILE '(' expression ')' statement {yTRACE("statement-> while (expression) statement");}
+  |   scope 				 {yTRACE("statement-> scope");}
   |   ';'
   ;
-else_statement:				 {yTRACE("epsilon: else_statement");}
-  |   ELSE statement			 {yTRACE("else statement");}
+else_statement:				 {yTRACE("else_statement-> epsilon");}
+  |   ELSE statement			 {yTRACE("else_statement-> else statement");}
   ;
 type
-  :   INT_T | IVEC_T | BOOL_T | BVEC_T | FLOAT_T | VEC_T {yTRACE("type");}
+  :   INT_T 				 {yTRACE("type-> INT_T");}
+  |   IVEC_T 				 {yTRACE("type-> IVEC_T");}
+  |   BOOL_T 				 {yTRACE("type-> BOOL_T");}
+  |   BVEC_T 				 {yTRACE("type-> BVEC_T");}
+  |   FLOAT_T 				 {yTRACE("type-> FLOAT_T");}
+  |   VEC_T 				 {yTRACE("type-> VEC_T");}
   ;
 expression
-  :   constructor 			 {yTRACE("constructor");}
-  |   function 				 {yTRACE("function");}
-  |   INT_C			         {yTRACE("integer literal");}
-  |   FLOAT_C				 {yTRACE("floating point literal");}
-  |   variable				 {yTRACE("variable");}
-  |   unary_op expression	%prec UNARY	 {yTRACE("unvary_op expression");}
-  |   expression binary_op expression    {yTRACE("expression binary_op expression");}
-  |   TRUE_C | FALSE_C		         {yTRACE("true | false");}
-  |   '(' expression ')'                 {yTRACE("(expression)");}
+  :   constructor 			 {yTRACE("expression-> constructor");}
+  |   function 				 {yTRACE("expression-> function");}
+  |   INT_C			         {yTRACE("expression-> INT_C");}
+  |   FLOAT_C				 {yTRACE("expression-> FLOAT_ ");}
+  |   variable				 {yTRACE("expression-> variable");}
+  |   unary_op expression    %prec UNARY {yTRACE("expression-> unvary_op expression");}
+  |   expression binary_op expression    {yTRACE("expression-> expression binary_op expression");}
+  |   TRUE_C 				 {yTRACE("expression-> TRUE_C");}
+  |   FALSE_C		                 {yTRACE("expression-> FALSE_C");}
+  |   '(' expression ')'                 {yTRACE("expression-> (expression)");}
   ;
 variable
-  :   ID				 {fprintf(traceFile, "(%s) ", $1); yTRACE("ID");}
-  |   ID '[' INT_C ']'                   {yTRACE("ID[int_lit]");}
+  :   ID				 {yTRACE("variable-> ID"); yTRACE($1);}
+  |   ID '[' INT_C ']'                   {yTRACE("variable-> ID[INT_C]");}
   ;
 unary_op
-  :   '!' | '-'				 {yTRACE("Unary_op" );}
+  :   '!' 				 {yTRACE("unary_op-> !");}
+  |   '-'				 {yTRACE("unary_op-> -");}
   ;
 binary_op
   :   AND | OR | NEQ | LEQ | GEQ | EQ | '<' | '>' | '+' | '-' | '*' | '/' | '^'
-                                         {yTRACE("Binary_op");}
+                                         {yTRACE("binary_op-> ????");}
   ;
 constructor
-  :   type '(' arguments ')'
+  :   type '(' arguments ')' 		 {yTRACE("constructor-> type (arguments)");}
   ;
 function
-  :   FUNC '(' arguments_opt ')'         {yTRACE("function_name (arguments_opt)");}
+  :   FUNC '(' arguments_opt ')'         {yTRACE("function-> FUNC(arguments_opt)");}
   ;
-arguments_opt:				 {yTRACE("epsilon: arguments_opt");}
-  |   arguments                          {yTRACE("arguments");}
+arguments_opt:				 {yTRACE("arguments_opt-> epsilon");}
+  |   arguments                          {yTRACE("arguments_opt-> arguments");}
   ;
 arguments
-  :   arguments ',' expression           {yTRACE("arguments , expression");}
-  |   expression			 {yTRACE("expression");}
+  :   arguments ',' expression           {yTRACE("arguments-> arguments , expression");}
+  |   expression			 {yTRACE("arguments-> expression");}
   ;
-
 
 
 %%
