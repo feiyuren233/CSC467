@@ -17,6 +17,7 @@
  *           external vars, functions etc. as needed.
  ***********************************************************************/
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include "common.h"
@@ -30,6 +31,11 @@ void yyerror(char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
 extern int yyline;        /* variable holding current line number   */
 void fTRACE(char* format, ...);
+
+enum RETURN_CODE {
+    SUCCESS = 0,
+    ERROR = 1
+};
 
 enum {
   DP3 = 0, 
@@ -106,7 +112,7 @@ enum {
  *    2. Implement the trace parser option of the compiler
  ***********************************************************************/
 program
-  :   scope     			 {fTRACE("program-> scope");}
+  :   scope     			 {fTRACE("program-> scope"); exit(SUCCESS);}
   ;
 scope
   :   '{' declarations statements '}'    {yTRACE("scope-> { declarations statements }");}
@@ -217,6 +223,8 @@ void yyerror(char* s) {
   } else {
     fprintf(errorFile, ": Reading token %s\n", yytname[YYTRANSLATE(yychar)]);
   }
+
+  exit(ERROR);
 }
 
 void fTRACE(char* format, ...)
