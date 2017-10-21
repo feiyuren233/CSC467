@@ -25,6 +25,7 @@
 #define YYERROR_VERBOSE
 #define yTRACE(x)    { if (traceParser) fprintf(traceFile, "%s\n", x); }
 #define enlTRACE(x)  { if (traceParser) fprintf(traceFile, "%s", x); }
+#define fTRACE(format, ...) { if (traceParser) fprintf(traceFile, format, __VA_ARGS__); }
 
 void yyerror(char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
@@ -146,7 +147,7 @@ type
 expression
   :   constructor 			 {yTRACE("expression-> constructor");}
   |   function 				 {yTRACE("expression-> function");}
-  |   INT_C			         {yTRACE("expression-> INT_C");}
+  |   INT_C			         {fTRACE("expression-> INT_C  val: %d", $1);}
   |   FLOAT_C				 {yTRACE("expression-> FLOAT_ ");}
   |   variable				 {yTRACE("expression-> variable");}
   |   unary_op expression    %prec UNARY {yTRACE("expression-> unvary_op expression");}
