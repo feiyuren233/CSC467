@@ -24,7 +24,6 @@
 //#include "semantic.h"
 #define YYERROR_VERBOSE
 #define yTRACE(x)    { if (traceParser) fprintf(traceFile, "%s\n", x); }
-#define enlTRACE(x)  { if (traceParser) fprintf(traceFile, "%s", x); }
 #define fTRACE(format, ...) { if (traceParser) fprintf(traceFile, format"\n", __VA_ARGS__); }
 
 void yyerror(char* s);    /* what to do in case of error            */
@@ -73,7 +72,6 @@ enum {
 %token          BOOL_T
 %token          CONST
 %token          FALSE_C TRUE_C
-%token          FUNC
 %token          IF WHILE ELSE
 %token          AND OR NEQ EQ LEQ GEQ
 
@@ -84,6 +82,7 @@ enum {
 %token <as_float> FLOAT_C
 %token <as_int>   INT_C
 %token <as_str>   ID
+%token <as_func>   FUNC
 
 
 %left 	OR AND EQ NEQ LEQ GEQ '<' '>'
@@ -118,12 +117,9 @@ statements:				 {yTRACE("statements-> epsilon");}
   |   statements statement 		 {yTRACE("statements-> statements statement");}
   ;
 declaration:				 {yTRACE("declaration-> epsilon");}
-  |   type ID ';'                        {enlTRACE("declaration-> type ID;");
-                                          enlTRACE("  ID: "); yTRACE($2);}
-  |   type ID '=' expression ';'         {enlTRACE("declaration-> type ID = expression;");
-                                          enlTRACE("  ID: "); yTRACE($2);}
-  |   CONST type ID '=' expression ';'   {yTRACE("declaration-> const type ID = expression;");
-                                          enlTRACE("  ID: "); yTRACE($3);}
+  |   type ID ';'                        {fTRACE("declaration-> type ID;  ID: %s", $2);}
+  |   type ID '=' expression ';'         {fTRACE("declaration-> type ID = expression;  ID: %s", $2);}
+  |   CONST type ID '=' expression ';'   {fTRACE("declaration-> const type ID = expression; ID: %s", $3);}
   ;
 statement
   :   variable '=' expression ';'        {yTRACE("statement-> variable = expression;");}
@@ -138,17 +134,17 @@ else_statement:				 {yTRACE("else_statement-> epsilon");}
   ;
 type
   :   INT_T 				 {yTRACE("type-> INT_T");}
-  |   IVEC_T 				 {yTRACE("type-> IVEC_T");}
+  |   IVEC_T 				 {fTRACE("type-> IVEC_T;  vec size: %d",$1+1);}
   |   BOOL_T 				 {yTRACE("type-> BOOL_T");}
-  |   BVEC_T 				 {yTRACE("type-> BVEC_T");}
+  |   BVEC_T 				 {fTRACE("type-> BVEC_T;  vec size: %d",$1+1);}
   |   FLOAT_T 				 {yTRACE("type-> FLOAT_T");}
-  |   VEC_T 				 {yTRACE("type-> VEC_T");}
+  |   VEC_T 				 {fTRACE("type-> VEC_T;  vec size: %d",$1+1);}
   ;
 expression
   :   constructor 			 {yTRACE("expression-> constructor");}
   |   function 				 {yTRACE("expression-> function");}
   |   INT_C			         {fTRACE("expression-> INT_C  val: %d", $1);}
-  |   FLOAT_C				 {yTRACE("expression-> FLOAT_ ");}
+  |   FLOAT_C				 {fTRACE("expression-> FLOAT_ val: %f", $1);}
   |   variable				 {yTRACE("expression-> variable");}
   |   unary_op expression    %prec UNARY {yTRACE("expression-> unvary_op expression");}
   |   expression binary_op expression    {yTRACE("expression-> expression binary_op expression");}
@@ -157,10 +153,8 @@ expression
   |   '(' expression ')'                 {yTRACE("expression-> (expression)");}
   ;
 variable
-  :   ID				 {enlTRACE("variable-> ID"); 
-                                          enlTRACE("  ID: "); yTRACE($1);}
-  |   ID '[' INT_C ']'                   {enlTRACE("variable-> ID[INT_C]");
-                                          enlTRACE("  ID: "); yTRACE($1);}
+  :   ID				 {fTRACE("variable-> ID;  ID: %s", $1);}
+  |   ID '[' INT_C ']'                   {fTRACE("variable-> ID[INT_C];  ID: %s, INT_C: %d", $1, $3);}
   ;
 unary_op
   :   '!' 				 {yTRACE("unary_op-> !");}
@@ -185,7 +179,7 @@ constructor
   :   type '(' arguments ')' 		 {yTRACE("constructor-> type (arguments)");}
   ;
 function
-  :   FUNC '(' arguments_opt ')'         {yTRACE("function-> FUNC(arguments_opt)");}
+  :   FUNC '(' arguments_opt ')'         {fTRACE("function-> FUNC(arguments_opt); Func #%d",$1);}
   ;
 arguments_opt:				 {yTRACE("arguments_opt-> epsilon");}
   |   arguments                          {yTRACE("arguments_opt-> arguments");}
