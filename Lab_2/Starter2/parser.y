@@ -162,8 +162,19 @@ unary_op
   |   '-'				 {yTRACE("unary_op-> -");}
   ;
 binary_op
-  :   AND | OR | NEQ | LEQ | GEQ | EQ | '<' | '>' | '+' | '-' | '*' | '/' | '^'
-                                         {yTRACE("binary_op-> ????");}
+  :   AND                                {yTRACE("binary_op-> AND &&");} 
+  |   OR                                 {yTRACE("binary_op-> OR  ||");} 
+  |   NEQ                                {yTRACE("binary_op-> NEQ !=");} 
+  |   LEQ                                {yTRACE("binary_op-> LEQ <=");} 
+  |   GEQ                                {yTRACE("binary_op-> GEQ >=");} 
+  |   EQ                                 {yTRACE("binary_op-> EQ  ==");} 
+  |   '<'                                {yTRACE("binary_op-> <");} 
+  |   '>'                                {yTRACE("binary_op-> >");} 
+  |   '+'                                {yTRACE("binary_op-> +");} 
+  |   '-'                                {yTRACE("binary_op-> -");} 
+  |   '*'                                {yTRACE("binary_op-> *");} 
+  |   '/'                                {yTRACE("binary_op-> /");} 
+  |   '^'				 {yTRACE("binary_op-> ^");}
   ;
 constructor
   :   type '(' arguments ')' 		 {yTRACE("constructor-> type (arguments)");}
