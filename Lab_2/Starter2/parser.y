@@ -25,7 +25,7 @@
 #define YYERROR_VERBOSE
 #define yTRACE(x)    { if (traceParser) fprintf(traceFile, "%s\n", x); }
 #define enlTRACE(x)  { if (traceParser) fprintf(traceFile, "%s", x); }
-#define fTRACE(format, ...) { if (traceParser) fprintf(traceFile, format, __VA_ARGS__); }
+#define fTRACE(format, ...) { if (traceParser) fprintf(traceFile, format"\n", __VA_ARGS__); }
 
 void yyerror(char* s);    /* what to do in case of error            */
 int yylex();              /* procedure for calling lexical analyzer */
