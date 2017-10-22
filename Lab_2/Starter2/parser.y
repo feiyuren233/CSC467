@@ -32,11 +32,6 @@ int yylex();              /* procedure for calling lexical analyzer */
 extern int yyline;        /* variable holding current line number   */
 void fTRACE(char* format, ...);
 
-enum RETURN_CODE {
-    SUCCESS = 0,
-    ERROR = 1
-};
-
 enum {
   DP3 = 0, 
   LIT = 1, 
@@ -89,14 +84,15 @@ enum {
 %token <as_float> FLOAT_C
 %token <as_int>   INT_C
 %token <as_str>   ID
-%token <as_func>   FUNC
+%token <as_func>  FUNC
 
-
-%left 	OR AND EQ NEQ LEQ GEQ '<' '>'
+%left   OR
+%left   AND
+%left 	EQ NEQ '<' LEQ '>' GEQ
 %left 	'+''-'
 %left 	'*''/'
 %right 	'^'
-%left   UNARY
+%left   UNARY '!'
 %left 	'['']''('')'
 
 
@@ -112,7 +108,7 @@ enum {
  *    2. Implement the trace parser option of the compiler
  ***********************************************************************/
 program
-  :   scope     			 {fTRACE("program-> scope"); exit(SUCCESS);}
+  :   scope     			 {fTRACE("program-> scope");}
   ;
 scope
   :   '{' declarations statements '}'    {yTRACE("scope-> { declarations statements }");}
@@ -124,8 +120,8 @@ statements:				 {yTRACE("statements-> epsilon");}
   |   statements statement 		 {yTRACE("statements-> statements statement");}
   ;
 declaration:				 {yTRACE("declaration-> epsilon");}
-  |   type ID ';'                        {fTRACE("declaration-> type ID;  ID: %s", $2);}
-  |   type ID '=' expression ';'         {fTRACE("declaration-> type ID = expression;  ID: %s", $2);}
+  |   type ID ';'                        {fTRACE("declaration-> type ID;   __ID: %s", $2);}
+  |   type ID '=' expression ';'         {fTRACE("declaration-> type ID = expression;   __ID: %s", $2);}
   |   CONST type ID '=' expression ';'   {fTRACE("declaration-> const type ID = expression; ID: %s", $3);}
   ;
 statement
@@ -141,17 +137,17 @@ else_statement:				 {yTRACE("else_statement-> epsilon");}
   ;
 type
   :   INT_T 				 {yTRACE("type-> INT_T");}
-  |   IVEC_T 				 {fTRACE("type-> IVEC_T;  vec size: %d",$1+1);}
+  |   IVEC_T 				 {fTRACE("type-> IVEC_T   __vec size: %d",$1+1);}
   |   BOOL_T 				 {yTRACE("type-> BOOL_T");}
-  |   BVEC_T 				 {fTRACE("type-> BVEC_T;  vec size: %d",$1+1);}
+  |   BVEC_T 				 {fTRACE("type-> BVEC_T   __vec size: %d",$1+1);}
   |   FLOAT_T 				 {yTRACE("type-> FLOAT_T");}
-  |   VEC_T 				 {fTRACE("type-> VEC_T;  vec size: %d",$1+1);}
+  |   VEC_T 				 {fTRACE("type-> VEC_T   __vec size: %d",$1+1);}
   ;
 expression
   :   constructor 			 {yTRACE("expression-> constructor");}
   |   function 				 {yTRACE("expression-> function");}
-  |   INT_C			         {fTRACE("expression-> INT_C  val: %d", $1);}
-  |   FLOAT_C				 {fTRACE("expression-> FLOAT_ val: %f", $1);}
+  |   INT_C			         {fTRACE("expression-> INT_C   __val: %d", $1);}
+  |   FLOAT_C				 {fTRACE("expression-> FLOAT_C   __val: %f", $1);}
   |   variable				 {yTRACE("expression-> variable");}
   |   unary_op expression    %prec UNARY {yTRACE("expression-> unvary_op expression");}
   |   expression binary_op expression    {yTRACE("expression-> expression binary_op expression");}
@@ -160,8 +156,8 @@ expression
   |   '(' expression ')'                 {yTRACE("expression-> (expression)");}
   ;
 variable
-  :   ID				 {fTRACE("variable-> ID;  ID: %s", $1);}
-  |   ID '[' INT_C ']'                   {fTRACE("variable-> ID[INT_C];  ID: %s, INT_C: %d", $1, $3);}
+  :   ID				 {fTRACE("variable-> ID   __ID: %s", $1);}
+  |   ID '[' INT_C ']'                   {fTRACE("variable-> ID[INT_C]   __ID: %s, INT_C: %d", $1, $3);}
   ;
 unary_op
   :   '!' 				 {yTRACE("unary_op-> !");}
@@ -223,8 +219,6 @@ void yyerror(char* s) {
   } else {
     fprintf(errorFile, ": Reading token %s\n", yytname[YYTRANSLATE(yychar)]);
   }
-
-  exit(ERROR);
 }
 
 void fTRACE(char* format, ...)
