@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string.h>
+#include <iostream>
 
 #include "ast.h"
 #include "common.h"
@@ -9,42 +10,70 @@
 
 #define DEBUG_PRINT_TREE 0
 
-node *ast = NULL;
+Node* ast = nullptr;
 
-node *ast_allocate(node_kind kind, ...) {
-  va_list args;
+Node::~Node() {}
 
-  // make the node
-  node *ast = (node *) malloc(sizeof(node));
-  memset(ast, 0, sizeof *ast);
-  ast->kind = kind;
-
-  va_start(args, kind); 
-
-  switch(kind) {
-  
-  // ...
-
-  case BINARY_EXPRESSION_NODE:
-    ast->binary_expr.op = va_arg(args, int);
-    ast->binary_expr.left = va_arg(args, node *);
-    ast->binary_expr.right = va_arg(args, node *);
-    break;
-
-  // ...
-
-  default: break;
-  }
-
-  va_end(args);
-
-  return ast;
+std::ostream& operator<<(std::ostream& os, const Node& node) {
+    return node.write(os);
 }
 
-void ast_free(node *ast) {
+Scope::Scope(Declarations *declarations, Statements *statements)
+        :Node(),
+         m_declarations(declarations), m_statements(statements) {}
 
+Scope::~Scope() {
+    delete m_declarations;
+    delete m_statements;
 }
 
-void ast_print(node * ast) {
+std::ostream& Scope::write(std::ostream& os) const {
+    return os << "SCOPE (" << *m_declarations << ") (" << *m_statements << ")" << std::endl;
+}
 
+Declarations::Declarations(Declarations *declarations, Declaration *declaration)
+        :Node(),
+         m_declarations(declarations), m_declaration(declaration) {}
+
+Declarations::~Declarations() {
+    delete m_declarations;
+    delete m_declaration;
+}
+
+std::ostream& Declarations::write(std::ostream &os) const {
+    return os << "DECLARATIONS (" << *m_declarations << *m_declaration << ")" << std::endl;
+}
+
+Declaration::Declaration(bool isConst, Type type, const std::string& _ID, Expression* expression)
+        :Node(), m_isConst(isConst), m_type(type), m_ID(_ID), m_expression(expression) {}
+
+Declaration::~Declaration() {
+    delete m_expression;
+}
+
+std::ostream& Declaration::write(std::ostream &os) const {
+    return os << (m_isConst ? "const " : "") << m_type.m_type << " " << m_ID << " " << *m_expression << std::endl;
+}
+
+
+
+Statements::Statements() {}
+Statements::~Statements() {}
+std::ostream& Statements::write(std::ostream &os) const {
+    return os << "STATEMENTS";
+}
+
+Expression::Expression() {}
+Expression::~Expression() {}
+std::ostream& Expression::write(std::ostream &os) const {
+    return os << "EXPRESSION";
+}
+
+
+void ast_free(Node *ast) {
+    delete ast;
+}
+
+void ast_print(Node * ast) {
+    std::cout << *ast << std::endl;
 }

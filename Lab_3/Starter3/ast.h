@@ -3,6 +3,7 @@
 #define AST_H_ 1
 
 #include <stdarg.h>
+#include <iostream>
 
 // Dummy node just so everything compiles, create your own node/nodes
 //
@@ -14,62 +15,85 @@
 // into inheritance.
 
 // forward declare
-struct node_;
-typedef struct node_ node;
-extern node *ast;
+class Node;
+class Scope;
+class Declarations;
+class Declaration;
+class Statements;
+class Statement;
+class Expression;
 
-typedef enum {
-  UNKNOWN               = 0,
-
-  SCOPE_NODE            = (1 << 0),
-  
-  EXPRESSION_NODE       = (1 << 2),
-  UNARY_EXPRESION_NODE  = (1 << 2) | (1 << 3),
-  BINARY_EXPRESSION_NODE= (1 << 2) | (1 << 4),
-  INT_NODE              = (1 << 2) | (1 << 5), 
-  FLOAT_NODE            = (1 << 2) | (1 << 6),
-  IDENT_NODE            = (1 << 2) | (1 << 7),
-  VAR_NODE              = (1 << 2) | (1 << 8),
-  FUNCTION_NODE         = (1 << 2) | (1 << 9),
-  CONSTRUCTOR_NODE      = (1 << 2) | (1 << 10),
-
-  STATEMENT_NODE        = (1 << 1),
-  IF_STATEMENT_NODE     = (1 << 1) | (1 << 11),
-  WHILE_STATEMENT_NODE  = (1 << 1) | (1 << 12),
-  ASSIGNMENT_NODE       = (1 << 1) | (1 << 13),
-  NESTED_SCOPE_NODE     = (1 << 1) | (1 << 14),
-
-  DECLARATION_NODE      = (1 << 15)
-} node_kind;
-
-struct node_ {
-
-  // an example of tagging each node with a type
-  node_kind kind;
-
-  union {
-    struct {
-      // declarations?
-      // statements?
-    } scope;
-  
-    struct {
-      int op;
-      node *right;
-    } unary_expr;
-
-    struct {
-      int op;
-      node *left;
-      node *right;
-    } binary_expr;
-
-    // etc.
-  };
+class Type
+{
+public:
+    Type(const char* type): m_type(type) {}
+    const std::string m_type;
 };
 
-node *ast_allocate(node_kind type, ...);
-void ast_free(node *ast);
-void ast_print(node * ast);
+class Node
+{
+public:
+    virtual ~Node(); //Analogous to free()
+    virtual std::ostream& write(std::ostream& os) const = 0;
+};
+std::ostream& operator<<(std::ostream& os, const Node& node);
+
+class Scope : public Node
+{
+public:
+    Scope(Declarations* declarations, Statements* statements);
+    virtual ~Scope();
+    virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    Declarations* m_declarations;
+    Statements* m_statements;
+};
+
+class Declarations : public Node
+{
+public:
+    Declarations(Declarations* declarations = nullptr, Declaration* declaration = nullptr);
+    virtual ~Declarations();
+    virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    Declarations* m_declarations;
+    Declaration* m_declaration;
+};
+
+class Declaration : public Node
+{
+public:
+    Declaration(bool isConst, Type type, const std::string& _ID, Expression* expression= nullptr);
+    virtual ~Declaration();
+    virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    bool m_isConst;
+    Type m_type;
+    const std::string& m_ID;
+    Expression* m_expression;
+};
+
+class Statements : public Node
+{
+public:
+    Statements();
+    virtual ~Statements();
+    virtual std::ostream& write(std::ostream& os) const;
+};
+
+class Expression : public Node
+{
+public:
+    Expression();
+    virtual ~Expression();
+    virtual std::ostream& write(std::ostream& os) const;
+};
+
+extern Node* ast;
+void ast_free(Node *ast);
+void ast_print(Node * ast);
 
 #endif /* AST_H_ */

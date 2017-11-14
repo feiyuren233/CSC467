@@ -65,7 +65,7 @@ enum {
   float as_float;
   char *as_str;
   int as_func;
-  node *as_ast;
+  Node *as_ast;
 }
 
 %token          FLOAT_T
@@ -101,7 +101,14 @@ enum {
 
 // type declarations
 // TODO: fill this out
+%type <as_ast> program
+%type <as_ast> scope
+%type <as_ast> declarations
+%type <as_ast> statements
+%type <as_ast> declaration
+%type <as_ast> statement
 %type <as_ast> expression
+%type <as_str> type
 
 // expect one shift/reduce conflict, where Bison chooses to shift
 // the ELSE.
@@ -119,36 +126,45 @@ enum {
  *    2. Implement the trace parser option of the compiler
  ***********************************************************************/
 program
-  : scope 
-      { yTRACE("program -> scope\n") } 
+  : scope
+      { yTRACE("program -> scope\n")
+        $$ = $1; }
   ;
 
 scope
   : '{' declarations statements '}'
-      { yTRACE("scope -> { declarations statements }\n") }
+      { yTRACE("scope -> { declarations statements }\n")
+        $$ = new Scope(static_cast<Declarations*>($2), static_cast<Statements*>($3)); }
   ;
 
 declarations
   : declarations declaration
-      { yTRACE("declarations -> declarations declaration\n") }
+      { yTRACE("declarations -> declarations declaration\n")
+        $$ = new Declarations(static_cast<Declarations*>($1), static_cast<Declaration*>($2)); }
   | 
-      { yTRACE("declarations -> \n") }
+      { yTRACE("declarations -> \n")
+        $$ = new Declarations(); }
   ;
 
 statements
   : statements statement
-      { yTRACE("statements -> statements statement\n") }
+      { yTRACE("statements -> statements statement\n")
+        $$ = new Statements(); }
   | 
-      { yTRACE("statements -> \n") }
+      { yTRACE("statements -> \n")
+        $$ = new Statements(); }
   ;
 
 declaration
   : type ID ';' 
-      { yTRACE("declaration -> type ID ;\n") }
+      { yTRACE("declaration -> type ID ;\n")
+        $$ = new Declaration(false, Type($1), std::string($2)); }
   | type ID '=' expression ';'
-      { yTRACE("declaration -> type ID = expression ;\n") }
+      { yTRACE("declaration -> type ID = expression ;\n")
+        $$ = new Declaration(false, Type($1), std::string($2), new Expression()); }
   | CONST type ID '=' expression ';'
-      { yTRACE("declaration -> CONST type ID = expression ;\n") }
+      { yTRACE("declaration -> CONST type ID = expression ;\n")
+        $$ = new Declaration(true, Type($2), std::string($3), new Expression()); }
   ;
 
 statement
@@ -166,17 +182,23 @@ statement
 
 type
   : INT_T
-      { yTRACE("type -> INT_T \n") }
+      { yTRACE("type -> INT_T \n") 
+        $$ = "TYPE"; }
   | IVEC_T
-      { yTRACE("type -> IVEC_T \n") }
+      { yTRACE("type -> IVEC_T \n") 
+	$$ = "TYPE"; }
   | BOOL_T
-      { yTRACE("type -> BOOL_T \n") }
+      { yTRACE("type -> BOOL_T \n") 
+       $$ = "TYPE"; }
   | BVEC_T
-      { yTRACE("type -> BVEC_T \n") }
+      { yTRACE("type -> BVEC_T \n") 
+       $$ = "TYPE"; }
   | FLOAT_T
-      { yTRACE("type -> FLOAT_T \n") }
+      { yTRACE("type -> FLOAT_T \n") 
+       $$ = "TYPE"; }
   | VEC_T
-      { yTRACE("type -> VEC_T \n") }
+      { yTRACE("type -> VEC_T \n") 
+       $$ = "TYPE"; }
   ;
 
 expression
