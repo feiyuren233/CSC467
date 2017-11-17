@@ -14,8 +14,8 @@ Node* ast = nullptr;
 
 Node::~Node() {}
 
-std::ostream& operator<<(std::ostream& os, const Node& node) {
-    return node.write(os);
+std::ostream& operator<<(std::ostream& os, const Node* node) {
+    return node? node->write(os) : os;
 }
 
 Scope::Scope(Declarations *declarations, Statements *statements)
@@ -28,7 +28,7 @@ Scope::~Scope() {
 }
 
 std::ostream& Scope::write(std::ostream& os) const {
-    return os << "SCOPE (" << *m_declarations << ") (" << *m_statements << ")" << std::endl;
+    return os << "SCOPE (" << m_declarations << ") (" << m_statements << ")" << std::endl;
 }
 
 Declarations::Declarations(Declarations *declarations, Declaration *declaration)
@@ -41,7 +41,7 @@ Declarations::~Declarations() {
 }
 
 std::ostream& Declarations::write(std::ostream &os) const {
-    return os << "DECLARATIONS (" << *m_declarations << *m_declaration << ")" << std::endl;
+    return os << "DECLARATIONS (" << m_declarations << m_declaration << ")" << std::endl;
 }
 
 Declaration::Declaration(bool isConst, Type type, const std::string& _ID, Expression* expression)
@@ -52,7 +52,7 @@ Declaration::~Declaration() {
 }
 
 std::ostream& Declaration::write(std::ostream &os) const {
-    return os << (m_isConst ? "const " : "") << m_type.m_type << " " << m_ID << " " << *m_expression << std::endl;
+    return os << (m_isConst ? "const " : "") << m_type.m_type << " " << m_ID << " " << m_expression << std::endl;
 }
 
 
@@ -75,5 +75,5 @@ void ast_free(Node *ast) {
 }
 
 void ast_print(Node * ast) {
-    std::cout << *ast << std::endl;
+    std::cout << ast << std::endl;
 }
