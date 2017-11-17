@@ -3,35 +3,17 @@ project(lab3)
 
 set(CMAKE_C_COMPILER g++)
 set(CMAKE_C_FLAGS "-g -O0 -Wall")
-set(CMAKE_CXX_FLAGS "")
-set(CMAKE_BUILD_DIR ${CMAKE_SOURCE_DIR}/build)
 
-add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/y.tab.c
-        COMMAND bash -c "bison -dtvy parser.y")
+find_package(BISON)
+find_package(FLEX)
 
-add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/y.tab.h
-        COMMAND bash -c "bison -dtvy parser.y")
+BISON_TARGET(BisonParser ${CMAKE_SOURCE_DIR}/parser.y ${CMAKE_SOURCE_DIR}/parser.c)
+FLEX_TARGET(FlexScanner ${CMAKE_SOURCE_DIR}/scanner.l ${CMAKE_SOURCE_DIR}/scanner.c)
+ADD_FLEX_BISON_DEPENDENCY(FlexScanner BisonParser)
 
-add_custom_command(
-	OUTPUT ${CMAKE_SOURCE_DIR}/parser.c
-	COMMAND bash -c "mv -f y.tab.c parser.c"
-	DEPENDS y.tab.c)
+set(SOURCE_FILES compiler467.c globalvars.c ast.cpp semantic.cpp symbol.cpp)
 
-add_custom_command(
-	OUTPUT ${CMAKE_SOURCE_DIR}/parser.tab.h
-	COMMAND bash -c "mv -f y.tab.h parser.tab.h"
-	DEPENDS y.tab.h)
+add_executable(compiler467 ${SOURCE_FILES} 
+			   ${BISON_BisonParser_OUTPUTS} ${FLEX_FlexScanner_OUTPUTS})
 
-add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/scanner.c
-        COMMAND bash -c "flex -t scanner.l >scanner.c")
 
-add_custom_target(run ALL DEPENDS parser.c parser.tab.h scanner.c)
-
-set(SOURCE_FILES compiler467.c globalvars.c parser.c scanner.c ast.cpp semantic.cpp symbol.cpp)
-
-add_executable(compiler467 ${SOURCE_FILES})
-
-TARGET_LINK_LIBRARIES(compiler467 fl)
