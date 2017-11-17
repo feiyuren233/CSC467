@@ -1,8 +1,8 @@
 #ifndef _SEMANTIC_H
 #define _SEMANTIC_H
 
-#include "ast.h"
-#include "symbol.h"
+#include "ast.hpp"
+#include "symbol.hpp"
 
 
 int semantic_check( Node *ast);

@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "ast.h"
+#include "ast.hpp"
 #include "parser.tab.h"
 
 #define YY_USER_INIT { yyin = inputFile; }

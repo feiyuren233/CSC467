@@ -4,7 +4,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "ast.h"
+#include "ast.hpp"
 #include "common.h"
 #include "parser.tab.h"
 

@@ -19,9 +19,9 @@
 #include <string.h>
 
 #include "common.h"
-#include "ast.h"
-#include "symbol.h"
-#include "semantic.h"
+#include "ast.hpp"
+#include "symbol.hpp"
+#include "semantic.hpp"
 
 #define YYERROR_VERBOSE
 #define yTRACE(x)    { if (traceParser) fprintf(traceFile, "%s\n", x); }

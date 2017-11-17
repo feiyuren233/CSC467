@@ -23,7 +23,7 @@
 #include "common.h"
 
 /* Phases 3,4: Uncomment following includes as needed */
-#include "ast.h"
+#include "ast.hpp"
 //#include "codegen.h"
 
 /***********************************************************************
