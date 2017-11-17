@@ -6,7 +6,7 @@
 
 #include "ast.hpp"
 #include "common.h"
-#include "parser.tab.h"
+#include "parser.h"
 
 #define DEBUG_PRINT_TREE 0
 

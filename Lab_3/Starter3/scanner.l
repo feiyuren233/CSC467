@@ -14,7 +14,7 @@
 
 #include "common.h"
 #include "ast.hpp"
-#include "parser.tab.h"
+#include "parser.h"
 
 #define YY_USER_INIT { yyin = inputFile; }
 #define yyinput      input
