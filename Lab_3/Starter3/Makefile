@@ -50,7 +50,7 @@ OBJs      =compiler467.o globalvars.o $(LEXER_OBJ) \
 .PHONY: all clean man
 all: compiler467
 clean:
-	@$(RM) compiler467 $(OBJs) lex.yy.c parser.tab.h parser.c y.output
+	@$(RM) compiler467 $(OBJs) lex.yy.c parser.h parser.c y.output
 man:
 	@nroff -man compiler467.man | less
 
@@ -61,6 +61,6 @@ compiler467: ${OBJs}
 ${OBJs}:     common.h 
 lex.yy.c:    scanner.l
 	$(LEX) $(LEXFLAGS) $<
-$(LEXER_OBJ): parser.tab.h
-parser.tab.h: parser.c
-	mv y.tab.h parser.tab.h
+$(LEXER_OBJ): parser.h
+parser.h: parser.c
+	mv y.tab.h parser.h
