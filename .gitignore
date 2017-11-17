@@ -1,3 +1,14 @@
 .idea
 *.o
 *.swp
+y.tab.h
+y.tab.c
+y.output
+parser.c
+parser.tab.h
+compiler467
+scanner.c
+
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
