@@ -128,7 +128,8 @@ enum {
 program
   : scope
       { yTRACE("program -> scope\n")
-        $$ = $1; }
+        ast = $1;
+      }
   ;
 
 scope
