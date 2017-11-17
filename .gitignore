@@ -8,8 +8,10 @@ parser.c
 parser.tab.h
 compiler467
 scanner.c
+parser.h
 
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 lab3.cbp
+
