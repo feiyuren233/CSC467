@@ -148,6 +148,7 @@ class OperationExpression : public Expression
 public:
     OperationExpression(int _op, Expression* rhs);
     OperationExpression(Expression* lhs, int _op, Expression* rhs);
+    virtual ~OperationExpression();
     virtual std::ostream& write(std::ostream& os) const;
 
 private:
@@ -159,9 +160,9 @@ private:
 class LiteralExpression : public Expression
 {
 public:
-    LiteralExpression(bool val);
-    LiteralExpression(int val);
-    LiteralExpression(float val);
+    explicit LiteralExpression(bool val);
+    explicit LiteralExpression(int val);
+    explicit LiteralExpression(float val);
     virtual std::ostream& write(std::ostream& os) const;
 
 private:
@@ -174,6 +175,24 @@ private:
         int m_valInt;
         float m_valFloat;
     };
+};
+
+class OtherExpression : public Expression
+{
+public:
+    OtherExpression(Expression* expression);
+    OtherExpression(Variable* variable);
+    OtherExpression(Type* _type, Arguments* arguments);
+    OtherExpression(int func, Arguments* arguments);
+    virtual ~OtherExpression();
+    virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    Expression* m_expression;
+    Variable* m_variable;
+    Arguments* m_arguments;
+    Type* m_type;
+    int m_func;
 };
 
 // Variable----------------------------------------

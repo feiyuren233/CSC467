@@ -184,6 +184,11 @@ OperationExpression::OperationExpression(int _op, Expression *rhs)
 OperationExpression::OperationExpression(Expression *lhs, int _op, Expression *rhs)
         :Expression(lhs->isConstExpr() && rhs->isConstExpr()), m_lhs(lhs), m_rhs(rhs), m_operator(_op) {}
 
+OperationExpression::~OperationExpression() {
+    delete m_lhs;
+    delete m_rhs;
+}
+
 std::ostream& OperationExpression::write(std::ostream &os) const {
     std::map<int, std::string> op_to_string{
             {AND, "&&"}, {OR, "||"}, {EQ, "=="}, {NEQ, "!="}, {LEQ, "<="}, {GEQ, ">="},
@@ -211,7 +216,41 @@ std::ostream& LiteralExpression::write(std::ostream& os) const {
         return os << m_valFloat;
 }
 
+OtherExpression::OtherExpression(Expression* expression)
+        :Expression(expression->isConstExpr()), m_expression(expression),
+         m_variable(nullptr), m_arguments(nullptr), m_type(nullptr), m_func(-1) {}
 
+OtherExpression::OtherExpression(Variable* variable)
+        :Expression(false), m_variable(variable),
+         m_expression(nullptr), m_arguments(nullptr), m_type(nullptr), m_func(-1) {}
+
+OtherExpression::OtherExpression(Type* _type, Arguments* arguments)
+        :Expression(false), m_type(_type), m_arguments(arguments),
+         m_expression(nullptr), m_variable(nullptr), m_func(-1) {}
+
+OtherExpression::OtherExpression(int func, Arguments* arguments)
+        :Expression(false), m_func(func), m_arguments(arguments),
+         m_expression(nullptr), m_variable(nullptr), m_type(nullptr) {}
+
+OtherExpression::~OtherExpression() {
+    delete m_expression;
+    delete m_variable;
+    delete m_arguments;
+    delete m_type;
+}
+
+std::ostream& OtherExpression::write(std::ostream &os) const {
+    if (m_expression)
+        return os << "( " << m_expression << " )";
+    else if (m_variable)
+        return os << m_variable;
+    else if (m_type)
+        return os << m_type << " ( " << m_arguments << " ) ";
+    else {
+        std::map<int, std::string> func_to_string{ {0, "dp3"}, {1, "lit"}, {2, "rsq"}};
+        return os << func_to_string[m_func] << " ( " << m_arguments << " ) ";
+    }
+}
 
 // Variable----------------------------------------
 Variable::Variable(const std::string& ID)

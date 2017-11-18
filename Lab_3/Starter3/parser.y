@@ -122,6 +122,7 @@ enum {
 %type  <as_int> '!' UMINUS                // 1
 %type  <as_int> '(' '['                   // 0
 
+%type  <as_int> FUNC
 
 // expect one shift/reduce conflict, where Bison chooses to shift
 // the ELSE.
@@ -176,26 +177,25 @@ declaration
   | type ID '=' expression ';'
       { yTRACE("declaration -> type ID = expression ;\n")
         $$ = new Declaration(false, static_cast<Type*>($1), 
-                             std::string($2), new Expression()); }/*static_cast<Expression*>($4)); }*/
+                             std::string($2), static_cast<Expression*>($4)); }
   | CONST type ID '=' expression ';'
       { yTRACE("declaration -> CONST type ID = expression ;\n")
         $$ = new Declaration(true, static_cast<Type*>($2), 
-                             std::string($3), new Expression()); }/*static_cast<Expression*>($5)); }*/
+                             std::string($3), static_cast<Expression*>($5)); }
   ;
 
 statement
   : variable '=' expression ';'
       { yTRACE("statement -> variable = expression ;\n") 
-        $$ = new Statement(static_cast<Variable*>($1), /*static_cast<Expression*>($3)*/
-                           new Expression());}
+        $$ = new Statement(static_cast<Variable*>($1), static_cast<Expression*>($3));}
   | IF '(' expression ')' statement ELSE statement %prec WITH_ELSE
       { yTRACE("statement -> IF ( expression ) statement ELSE statement \n") 
-        $$ = new Statement(/*static_cast<Expression*>($3),*/ new Expression(), 
+        $$ = new Statement(static_cast<Expression*>($3), 
                            static_cast<Statement*>($5),
                            static_cast<Statement*>($7));}
   | IF '(' expression ')' statement %prec WITHOUT_ELSE
       { yTRACE("statement -> IF ( expression ) statement \n") 
-        $$ = new Statement(/*static_cast<Expression*>($3),*/ new Expression(), 
+        $$ = new Statement(static_cast<Expression*>($3), 
                            static_cast<Statement*>($5));}
   | scope 
       { yTRACE("statement -> scope \n") 
@@ -232,9 +232,11 @@ expression
 
   /* function-like operators */
   : type '(' arguments_opt ')' %prec '('
-      { yTRACE("expression -> type ( arguments_opt ) \n") }
+      { yTRACE("expression -> type ( arguments_opt ) \n") 
+        $$ = new OtherExpression(static_cast<Type*>($1), static_cast<Arguments*>($3));}
   | FUNC '(' arguments_opt ')' %prec '('
-      { yTRACE("expression -> FUNC ( arguments_opt ) \n") }
+      { yTRACE("expression -> FUNC ( arguments_opt ) \n") 
+        $$ = new OtherExpression($1, static_cast<Arguments*>($3));}
 
   /* unary opterators */
   | '-' expression %prec UMINUS
@@ -301,9 +303,11 @@ expression
 
   /* misc */
   | '(' expression ')'
-      { yTRACE("expression -> ( expression ) \n") }
-  | variable { }
-    { yTRACE("expression -> variable \n") }
+      { yTRACE("expression -> ( expression ) \n") 
+        $$ = new OtherExpression(static_cast<Expression*>($2));}
+  | variable
+    { yTRACE("expression -> variable \n") 
+      $$ = new OtherExpression(static_cast<Variable*>($1));}
   ;
 
 variable
