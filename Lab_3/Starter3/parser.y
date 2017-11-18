@@ -108,7 +108,7 @@ enum {
 %type <as_ast> declaration
 %type <as_ast> statement
 %type <as_ast> expression
-%type <as_str> type
+%type <as_ast> type
 
 // expect one shift/reduce conflict, where Bison chooses to shift
 // the ELSE.
@@ -159,13 +159,13 @@ statements
 declaration
   : type ID ';' 
       { yTRACE("declaration -> type ID ;\n")
-        $$ = new Declaration(false, Type($1), std::string($2)); }
+        $$ = new Declaration(false, static_cast<Type*>($1), std::string($2)); }
   | type ID '=' expression ';'
       { yTRACE("declaration -> type ID = expression ;\n")
-        $$ = new Declaration(false, Type($1), std::string($2), new Expression()); }
+        $$ = new Declaration(false, static_cast<Type*>($1), std::string($2), new Expression()); }
   | CONST type ID '=' expression ';'
       { yTRACE("declaration -> CONST type ID = expression ;\n")
-        $$ = new Declaration(true, Type($2), std::string($3), new Expression()); }
+        $$ = new Declaration(true, static_cast<Type*>($2), std::string($3), new Expression()); }
   ;
 
 statement
@@ -184,22 +184,22 @@ statement
 type
   : INT_T
       { yTRACE("type -> INT_T \n") 
-        $$ = "TYPE"; }
+        $$ = new Type(INT_T); }
   | IVEC_T
       { yTRACE("type -> IVEC_T \n") 
-	$$ = "TYPE"; }
+	$$ = new Type(IVEC_T); }
   | BOOL_T
       { yTRACE("type -> BOOL_T \n") 
-       $$ = "TYPE"; }
+        $$ = new Type(BOOL_T); }
   | BVEC_T
       { yTRACE("type -> BVEC_T \n") 
-       $$ = "TYPE"; }
+        $$ = new Type(BVEC_T, yylval.as_vec); }
   | FLOAT_T
       { yTRACE("type -> FLOAT_T \n") 
-       $$ = "TYPE"; }
+        $$ = new Type(FLOAT_T, yylval.as_vec); }
   | VEC_T
       { yTRACE("type -> VEC_T \n") 
-       $$ = "TYPE"; }
+        $$ = new Type(VEC_T, yylval.as_vec); }
   ;
 
 expression
