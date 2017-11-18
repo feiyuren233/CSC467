@@ -133,9 +133,27 @@ private:
 class Expression : public Node
 {
 public:
-    Expression();
-    virtual ~Expression();
+    Expression() = default;
+    virtual ~Expression() = default;
+    virtual std::ostream& write(std::ostream& os) const {return os;};
+
+    bool isConstExpr() { return m_isConstExpr;}
+
+protected:
+    bool m_isConstExpr;
+};
+
+class OperationExpression : public Expression
+{
+public:
+    OperationExpression(int _op, Expression* rhs);
+    OperationExpression(Expression* lhs, int _op, Expression* rhs);
     virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    Expression* m_lhs;
+    Expression* m_rhs;
+    int m_operator;
 };
 
 // Variable----------------------------------------

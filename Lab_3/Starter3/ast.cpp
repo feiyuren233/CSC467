@@ -178,12 +178,22 @@ std::ostream& Type::write(std::ostream &os) const {
 
 
 // Expression--------------------------------------
-Expression::Expression() {}
-Expression::~Expression() {}
-std::ostream& Expression::write(std::ostream &os) const {
-    return os << "some_expression";
-}
+OperationExpression::OperationExpression(int _op, Expression *rhs)
+        :m_lhs(nullptr), m_rhs(rhs), m_operator(_op)
+         { m_isConstExpr = rhs->isConstExpr(); }
 
+OperationExpression::OperationExpression(Expression *lhs, int _op, Expression *rhs)
+        :m_lhs(lhs), m_rhs(rhs), m_operator(_op)
+         { m_isConstExpr = lhs->isConstExpr() && rhs->isConstExpr(); }
+
+std::ostream& OperationExpression::write(std::ostream &os) const {
+    std::map<int, std::string> op_to_string{
+            {AND, "&&"}, {OR, "||"}, {EQ, "=="}, {NEQ, "!="}, {LEQ, "<="}, {GEQ, ">="},
+            {'<', "<"}, {'>', ">"}, {'+', "+"}, {'-', "-"}, {'*', "*"}, {'/', "/"}, {'^', "^"},
+            {UMINUS, "-"}, {'!', "!"}};
+
+    return os << m_lhs << (m_lhs? " " : "") << m_operator << (m_lhs? " " : "") << m_rhs;
+}
 
 // Variable----------------------------------------
 Variable::Variable(const std::string& ID)
