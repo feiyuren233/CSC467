@@ -33,7 +33,7 @@ public:
 class Node
 {
 public:
-    virtual ~Node(); //Analogous to free()
+    virtual ~Node() = default; //Analogous to free()
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
 std::ostream& operator<<(std::ostream& os, const Node& node);

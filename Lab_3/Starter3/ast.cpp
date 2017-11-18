@@ -12,8 +12,6 @@
 
 Node* ast = nullptr;
 
-Node::~Node() {}
-
 std::ostream& operator<<(std::ostream& os, const Node* node) {
     return node? node->write(os) : os;
 }
@@ -28,7 +26,9 @@ Scope::~Scope() {
 }
 
 std::ostream& Scope::write(std::ostream& os) const {
-    return os << "SCOPE (" << m_declarations << ") (" << m_statements << ")" << std::endl;
+    return os << "\nSCOPE ("
+              << "\nDECLARATIONS (" << m_declarations << ") ("
+              << "\nSTATEMENTS (" << m_statements << ")";
 }
 
 Declarations::Declarations(Declarations *declarations, Declaration *declaration)
@@ -41,7 +41,7 @@ Declarations::~Declarations() {
 }
 
 std::ostream& Declarations::write(std::ostream &os) const {
-    return os << "DECLARATIONS (" << m_declarations << m_declaration << ")" << std::endl;
+    return os << m_declarations << m_declaration;
 }
 
 Declaration::Declaration(bool isConst, Type type, const std::string& _ID, Expression* expression)
@@ -52,7 +52,7 @@ Declaration::~Declaration() {
 }
 
 std::ostream& Declaration::write(std::ostream &os) const {
-    return os << (m_isConst ? "const " : "") << m_type.m_type << " " << m_ID << " " << m_expression << std::endl;
+    return os << std::endl << (m_isConst ? "const " : "") << m_type.m_type << " " << m_ID << " " << m_expression;
 }
 
 
@@ -60,13 +60,13 @@ std::ostream& Declaration::write(std::ostream &os) const {
 Statements::Statements() {}
 Statements::~Statements() {}
 std::ostream& Statements::write(std::ostream &os) const {
-    return os << "STATEMENTS";
+    return os << std::endl << "some_statement";
 }
 
 Expression::Expression() {}
 Expression::~Expression() {}
 std::ostream& Expression::write(std::ostream &os) const {
-    return os << "EXPRESSION";
+    return os << std::endl << "some_expression";
 }
 
 
