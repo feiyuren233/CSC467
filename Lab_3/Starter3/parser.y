@@ -107,8 +107,10 @@ enum {
 %type <as_ast> statements
 %type <as_ast> declaration
 %type <as_ast> statement
-%type <as_ast> expression
 %type <as_ast> type
+%type <as_ast> expression
+%type <as_ast> variable
+%type <as_ast> arguments
 
 // expect one shift/reduce conflict, where Bison chooses to shift
 // the ELSE.
@@ -150,7 +152,7 @@ declarations
 statements
   : statements statement
       { yTRACE("statements -> statements statement\n")
-        $$ = new Statements(); }
+        $$ = new Statements(static_cast<Statements*>($1), static_cast<Statement*>($2)); }
   | 
       { yTRACE("statements -> \n")
         $$ = new Statements(); }
@@ -162,23 +164,34 @@ declaration
         $$ = new Declaration(false, static_cast<Type*>($1), std::string($2)); }
   | type ID '=' expression ';'
       { yTRACE("declaration -> type ID = expression ;\n")
-        $$ = new Declaration(false, static_cast<Type*>($1), std::string($2), new Expression()); }
+        $$ = new Declaration(false, static_cast<Type*>($1), 
+                             std::string($2), new Expression()); }/*static_cast<Expression*>($4)); }*/
   | CONST type ID '=' expression ';'
       { yTRACE("declaration -> CONST type ID = expression ;\n")
-        $$ = new Declaration(true, static_cast<Type*>($2), std::string($3), new Expression()); }
+        $$ = new Declaration(true, static_cast<Type*>($2), 
+                             std::string($3), new Expression()); }/*static_cast<Expression*>($5)); }*/
   ;
 
 statement
   : variable '=' expression ';'
-      { yTRACE("statement -> variable = expression ;\n") }
+      { yTRACE("statement -> variable = expression ;\n") 
+        $$ = new Statement(/*static_cast<Variable*>($1), static_cast<Expression*>($3)*/
+                           new Variable(), new Expression());}
   | IF '(' expression ')' statement ELSE statement %prec WITH_ELSE
-      { yTRACE("statement -> IF ( expression ) statement ELSE statement \n") }
+      { yTRACE("statement -> IF ( expression ) statement ELSE statement \n") 
+        $$ = new Statement(/*static_cast<Expression*>($3),*/ new Expression(), 
+                           static_cast<Statement*>($5),
+                           static_cast<Statement*>($7));}
   | IF '(' expression ')' statement %prec WITHOUT_ELSE
-      { yTRACE("statement -> IF ( expression ) statement \n") }
+      { yTRACE("statement -> IF ( expression ) statement \n") 
+        $$ = new Statement(/*static_cast<Expression*>($3),*/ new Expression(), 
+                           static_cast<Statement*>($5));}
   | scope 
-      { yTRACE("statement -> scope \n") }
+      { yTRACE("statement -> scope \n") 
+        $$ = new Statement(static_cast<Scope*>($1));}
   | ';'
-      { yTRACE("statement -> ; \n") }
+      { yTRACE("statement -> ; \n") 
+        $$ = new Statement();}
   ;
 
 type

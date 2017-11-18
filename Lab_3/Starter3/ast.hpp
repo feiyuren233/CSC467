@@ -19,11 +19,14 @@ extern Node* ast;
 // forward declare
 class Scope;
 class Declarations;
-class Declaration;
 class Statements;
+class Declaration;
 class Statement;
-class Expression;
 class Type;
+class Expression;
+class Variable;
+class Arguments;
+
 
 class Node
 {
@@ -33,11 +36,15 @@ public:
 
 protected:
     static int m_writeScopeLevel;
+    static int m_writeIfLevel;
     void enterScope() const;
     void exitScope() const;
+    void enterIf() const;
+    void exitIf() const;
     std::string indent(int relative = 0) const;
 };
 
+// Scope-------------------------------------------
 class Scope : public Node
 {
 public:
@@ -50,6 +57,7 @@ private:
     Statements* m_statements;
 };
 
+// Declarations------------------------------------
 class Declarations : public Node
 {
 public:
@@ -62,6 +70,20 @@ private:
     Declaration* m_declaration;
 };
 
+// Statements--------------------------------------
+class Statements : public Node
+{
+public:
+    Statements(Statements* statements = nullptr, Statement* statement = nullptr);
+    virtual ~Statements();
+    virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    Statements* m_statements;
+    Statement* m_statement;
+};
+
+// Declaration-------------------------------------
 class Declaration : public Node
 {
 public:
@@ -76,22 +98,25 @@ private:
     Expression* m_expression;
 };
 
-class Statements : public Node
+// Statement---------------------------------------
+class Statement : public Node
 {
 public:
-    Statements();
-    virtual ~Statements();
+    Statement(Scope* scope = nullptr);
+    Statement(Variable* variable, Expression* expression);
+    Statement(Expression* expression, Statement* statement, Statement* else_statement= nullptr);
+    virtual ~Statement();
     virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    Scope* m_scope;
+    Variable* m_variable;
+    Expression* m_expression;
+    Statement* m_statement;
+    Statement* m_elseStatement;
 };
 
-class Expression : public Node
-{
-public:
-    Expression();
-    virtual ~Expression();
-    virtual std::ostream& write(std::ostream& os) const;
-};
-
+// Type--------------------------------------------
 class Type : public Node
 {
 public:
@@ -103,6 +128,34 @@ private:
     int m_primaryType;
     int m_vecSize;
 };
+
+// Expression--------------------------------------
+class Expression : public Node
+{
+public:
+    Expression();
+    virtual ~Expression();
+    virtual std::ostream& write(std::ostream& os) const;
+};
+
+// Variable----------------------------------------
+class Variable : public Node
+{
+public:
+    Variable();
+    virtual ~Variable();
+    virtual std::ostream& write(std::ostream& os) const;
+};
+
+// Arguments---------------------------------------
+class Arguments : public Node
+{
+public:
+    Arguments();
+    virtual ~Arguments();
+    virtual std::ostream& write(std::ostream& os) const;
+};
+
 
 
 std::ostream& operator<<(std::ostream& os, const Node* node);

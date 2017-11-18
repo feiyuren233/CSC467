@@ -15,6 +15,7 @@
 Node* ast = nullptr;
 
 int Node::m_writeScopeLevel = 0;
+int Node::m_writeIfLevel = 0;
 
 void Node::enterScope() const {
     m_writeScopeLevel++;
@@ -24,17 +25,26 @@ void Node::exitScope() const {
     m_writeScopeLevel--;
 }
 
+void Node::enterIf() const {
+    m_writeIfLevel++;
+}
+
+void Node::exitIf() const {
+    m_writeIfLevel--;
+}
+
 std::string Node::indent(int relative) const {
     std::string ret;
-    for (int i = m_writeScopeLevel + relative - 1; i > 0; i--) {
+    for (int i = m_writeScopeLevel + m_writeIfLevel + relative - 1; i > 0; i--) {
         ret += "    ";
     }
     return ret;
 }
 
 
+// Scope-------------------------------------------
 Scope::Scope(Declarations *declarations, Statements *statements)
-        :Node(), m_declarations(declarations), m_statements(statements) {}
+        :m_declarations(declarations), m_statements(statements) {}
 
 Scope::~Scope() {
     delete m_declarations;
@@ -51,8 +61,9 @@ std::ostream& Scope::write(std::ostream& os) const {
 }
 
 
+// Declarations------------------------------------
 Declarations::Declarations(Declarations *declarations, Declaration *declaration)
-        :Node(), m_declarations(declarations), m_declaration(declaration) {}
+        :m_declarations(declarations), m_declaration(declaration) {}
 
 Declarations::~Declarations() {
     delete m_declarations;
@@ -64,6 +75,21 @@ std::ostream& Declarations::write(std::ostream &os) const {
 }
 
 
+// Statements--------------------------------------
+Statements::Statements(Statements* statements, Statement* statement)
+        :m_statements(statements), m_statement(statement) {}
+
+Statements::~Statements() {
+    delete m_statements;
+    delete m_statement;
+}
+
+std::ostream& Statements::write(std::ostream &os) const {
+    return os << m_statements << m_statement;
+}
+
+
+// Declaration-------------------------------------
 Declaration::Declaration(bool isConst, Type* type, const std::string& _ID, Expression* expression)
         :Node(), m_isConst(isConst), m_type(type), m_ID(_ID), m_expression(expression) {}
 
@@ -78,19 +104,49 @@ std::ostream& Declaration::write(std::ostream &os) const {
 }
 
 
+// Statement---------------------------------------
+Statement::Statement(Scope *scope)
+        :m_scope(scope),
+         m_variable(nullptr), m_expression(nullptr), m_statement(nullptr), m_elseStatement(nullptr) {}
 
-Statements::Statements() {}
-Statements::~Statements() {}
-std::ostream& Statements::write(std::ostream &os) const {
-    return os << "some_statement";
+Statement::Statement(Variable *variable, Expression *expression)
+        :m_variable(variable), m_expression(expression),
+         m_scope(nullptr), m_statement(nullptr), m_elseStatement(nullptr) {}
+
+Statement::Statement(Expression *expression, Statement *statement, Statement *else_statement)
+        :m_expression(expression), m_statement(statement), m_elseStatement(else_statement),
+         m_scope(nullptr), m_variable(nullptr) {}
+
+Statement::~Statement() {
+    delete m_scope;
+    delete m_variable;
+    delete m_expression;
+    delete m_statement;
+    delete m_elseStatement;
 }
 
-Expression::Expression() {}
-Expression::~Expression() {}
-std::ostream& Expression::write(std::ostream &os) const {
-    return os << "some_expression";
+std::ostream& Statement::write(std::ostream &os) const {
+    if (!(m_scope || m_variable || m_expression || m_statement || m_elseStatement))
+        return os;
+    else if (m_scope)
+        return os << m_scope;
+    else if (m_variable && m_expression)
+        return os << std::endl << indent(1) << m_variable << " = " << m_expression;
+    else if (m_expression && m_statement) {
+        enterIf();
+        os << std::endl << indent(0) << "IF ( " << m_expression << " )"
+           << m_statement;
+        if (m_elseStatement) {
+            os << std::endl << indent(0) << "ELSE"
+               << m_elseStatement;
+        }
+        exitIf();
+        return os;
+    } else throw 0; //TODO: See about throwing an informative exception here
 }
 
+
+// Type--------------------------------------------
 Type::Type(int _type, int vec_size)
         :m_enumGivenType(_type), m_vecSize(vec_size) {
     if (m_vecSize == 1)
@@ -119,6 +175,33 @@ std::ostream& Type::write(std::ostream &os) const {
 
     return os << type_enum_to_string[m_enumGivenType] << ((m_vecSize > 1)? std::to_string(m_vecSize) : "");
 }
+
+
+// Expression--------------------------------------
+Expression::Expression() {}
+Expression::~Expression() {}
+std::ostream& Expression::write(std::ostream &os) const {
+    return os << "some_expression";
+}
+
+
+// Variable----------------------------------------
+Variable::Variable() {}
+Variable::~Variable() {}
+std::ostream& Variable::write(std::ostream &os) const {
+    return os << "some_variable";
+}
+
+
+// Arguments---------------------------------------
+Arguments::Arguments() {}
+Arguments::~Arguments() {}
+std::ostream& Arguments::write(std::ostream &os) const {
+    return os << "some_arguments";
+}
+
+
+
 
 std::ostream& operator<<(std::ostream& os, const Node* node) {
     return node? node->write(os) : os;
