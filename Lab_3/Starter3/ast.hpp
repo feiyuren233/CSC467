@@ -133,7 +133,7 @@ private:
 class Expression : public Node
 {
 public:
-    Expression() = default;
+    Expression(bool is_constexpr = false) :m_isConstExpr(is_constexpr) {}
     virtual ~Expression() = default;
     virtual std::ostream& write(std::ostream& os) const {return os;};
 
@@ -154,6 +154,26 @@ private:
     Expression* m_lhs;
     Expression* m_rhs;
     int m_operator;
+};
+
+class LiteralExpression : public Expression
+{
+public:
+    LiteralExpression(bool val);
+    LiteralExpression(int val);
+    LiteralExpression(float val);
+    virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    bool m_isBool;
+    bool m_isInt;
+    bool m_isFloat;
+
+    union {
+        bool m_valBool;
+        int m_valInt;
+        float m_valFloat;
+    };
 };
 
 // Variable----------------------------------------

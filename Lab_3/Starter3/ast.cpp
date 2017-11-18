@@ -179,12 +179,10 @@ std::ostream& Type::write(std::ostream &os) const {
 
 // Expression--------------------------------------
 OperationExpression::OperationExpression(int _op, Expression *rhs)
-        :m_lhs(nullptr), m_rhs(rhs), m_operator(_op)
-         { m_isConstExpr = rhs->isConstExpr(); }
+        :Expression(rhs->isConstExpr()), m_lhs(nullptr), m_rhs(rhs), m_operator(_op) {}
 
 OperationExpression::OperationExpression(Expression *lhs, int _op, Expression *rhs)
-        :m_lhs(lhs), m_rhs(rhs), m_operator(_op)
-         { m_isConstExpr = lhs->isConstExpr() && rhs->isConstExpr(); }
+        :Expression(lhs->isConstExpr() && rhs->isConstExpr()), m_lhs(lhs), m_rhs(rhs), m_operator(_op) {}
 
 std::ostream& OperationExpression::write(std::ostream &os) const {
     std::map<int, std::string> op_to_string{
@@ -192,8 +190,28 @@ std::ostream& OperationExpression::write(std::ostream &os) const {
             {'<', "<"}, {'>', ">"}, {'+', "+"}, {'-', "-"}, {'*', "*"}, {'/', "/"}, {'^', "^"},
             {UMINUS, "-"}, {'!', "!"}};
 
-    return os << m_lhs << (m_lhs? " " : "") << m_operator << (m_lhs? " " : "") << m_rhs;
+    return os << m_lhs << (m_lhs? " " : "") << op_to_string[m_operator] << (m_lhs? " " : "") << m_rhs;
 }
+
+LiteralExpression::LiteralExpression(bool val)
+        :Expression(true), m_valBool(val), m_isBool(true), m_isInt(false), m_isFloat(false) {}
+
+LiteralExpression::LiteralExpression(int val)
+        :Expression(true), m_valInt(val), m_isBool(false), m_isInt(true), m_isFloat(false) {}
+
+LiteralExpression::LiteralExpression(float val)
+        :Expression(true), m_valFloat(val), m_isBool(false), m_isInt(true), m_isFloat(false) {}
+
+std::ostream& LiteralExpression::write(std::ostream& os) const {
+    if (m_isBool)
+        return os << (m_valBool? "true" : "false");
+    else if (m_isInt)
+        return os << m_valInt;
+    else if (m_isFloat)
+        return os << m_valFloat;
+}
+
+
 
 // Variable----------------------------------------
 Variable::Variable(const std::string& ID)

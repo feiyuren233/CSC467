@@ -287,13 +287,17 @@ expression
 
   /* literals */
   | TRUE_C
-      { yTRACE("expression -> TRUE_C \n") }
+      { yTRACE("expression -> TRUE_C \n") 
+        $$ = new LiteralExpression(true);}
   | FALSE_C
-      { yTRACE("expression -> FALSE_C \n") }
+      { yTRACE("expression -> FALSE_C \n") 
+        $$ = new LiteralExpression(false);}
   | INT_C
-      { yTRACE("expression -> INT_C \n") }
+      { yTRACE("expression -> INT_C \n") 
+        $$ = new LiteralExpression(yylval.as_int);}
   | FLOAT_C
-      { yTRACE("expression -> FLOAT_C \n") }
+      { yTRACE("expression -> FLOAT_C \n") 
+        $$ = new LiteralExpression(yylval.as_float);}
 
   /* misc */
   | '(' expression ')'
