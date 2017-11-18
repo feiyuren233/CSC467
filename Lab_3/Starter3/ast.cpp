@@ -14,6 +14,25 @@
 
 Node* ast = nullptr;
 
+int Node::m_writeScopeLevel = 0;
+
+void Node::enterScope() const {
+    m_writeScopeLevel++;
+}
+
+void Node::exitScope() const {
+    m_writeScopeLevel--;
+}
+
+std::string Node::indent(int relative) const {
+    std::string ret;
+    for (int i = m_writeScopeLevel + relative - 1; i > 0; i--) {
+        ret += "    ";
+    }
+    return ret;
+}
+
+
 Scope::Scope(Declarations *declarations, Statements *statements)
         :Node(), m_declarations(declarations), m_statements(statements) {}
 
@@ -23,10 +42,14 @@ Scope::~Scope() {
 }
 
 std::ostream& Scope::write(std::ostream& os) const {
-    return os << "\nSCOPE ("
-              << "\nDECLARATIONS (" << m_declarations << ") ("
-              << "\nSTATEMENTS (" << m_statements << ")";
+    enterScope();
+    os << std::endl << indent(0) << "SCOPE ("
+       << std::endl << indent(0) << "DECLARATIONS (" << m_declarations << ")"
+       << std::endl << indent(0) << "STATEMENTS (" << m_statements << ")";
+    exitScope();
+    return os;
 }
+
 
 Declarations::Declarations(Declarations *declarations, Declaration *declaration)
         :Node(), m_declarations(declarations), m_declaration(declaration) {}
@@ -40,6 +63,7 @@ std::ostream& Declarations::write(std::ostream &os) const {
     return os << m_declarations << m_declaration;
 }
 
+
 Declaration::Declaration(bool isConst, Type* type, const std::string& _ID, Expression* expression)
         :Node(), m_isConst(isConst), m_type(type), m_ID(_ID), m_expression(expression) {}
 
@@ -49,7 +73,7 @@ Declaration::~Declaration() {
 }
 
 std::ostream& Declaration::write(std::ostream &os) const {
-    return os << std::endl << "    "
+    return os << std::endl << indent(1)
               << (m_isConst ? "const " : "") << m_type << " " << m_ID << " " << m_expression;
 }
 

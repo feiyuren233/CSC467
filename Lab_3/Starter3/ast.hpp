@@ -30,6 +30,12 @@ class Node
 public:
     virtual ~Node() = default; //Analogous to free()
     virtual std::ostream& write(std::ostream& os) const = 0;
+
+protected:
+    static int m_writeScopeLevel;
+    void enterScope() const;
+    void exitScope() const;
+    std::string indent(int relative = 0) const;
 };
 
 class Scope : public Node

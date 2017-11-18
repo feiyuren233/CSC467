@@ -1,6 +1,5 @@
 {
     int temp1 = 10;
     int temp2 = 10;
-    int temp3 = 0;
-    temp3 = temp1 + temp2;
+    int temp3;
 }
