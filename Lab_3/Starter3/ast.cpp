@@ -186,18 +186,28 @@ std::ostream& Expression::write(std::ostream &os) const {
 
 
 // Variable----------------------------------------
-Variable::Variable() {}
-Variable::~Variable() {}
+Variable::Variable(const std::string& ID)
+        :m_ID(ID), m_index(0), m_isIndexPresent(false) {}
+
+Variable::Variable(const std::string& ID, int index)
+        :m_ID(ID), m_index(index), m_isIndexPresent(true) {}
+
 std::ostream& Variable::write(std::ostream &os) const {
-    return os << "some_variable";
+    return os << m_ID << (m_isIndexPresent? ("[" + std::to_string(m_index) + "]") : "");
 }
 
 
 // Arguments---------------------------------------
-Arguments::Arguments() {}
-Arguments::~Arguments() {}
+Arguments::Arguments(Arguments* arguments, Expression* expression)
+        :m_arguments(arguments), m_expression(expression) {}
+
+Arguments::~Arguments() {
+    delete m_arguments;
+    delete m_expression;
+}
+
 std::ostream& Arguments::write(std::ostream &os) const {
-    return os << "some_arguments";
+    return os << m_arguments << ((m_arguments && m_expression)? ", " : "") << m_expression;
 }
 
 

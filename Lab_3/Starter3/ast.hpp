@@ -142,18 +142,28 @@ public:
 class Variable : public Node
 {
 public:
-    Variable();
-    virtual ~Variable();
+    Variable(const std::string& ID);
+    Variable(const std::string& ID, int index);
+    virtual ~Variable() = default;
     virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    const std::string m_ID;
+    int m_index;
+    bool m_isIndexPresent;
 };
 
 // Arguments---------------------------------------
 class Arguments : public Node
 {
 public:
-    Arguments();
+    Arguments(Arguments* arguments = nullptr, Expression* expression = nullptr);
     virtual ~Arguments();
     virtual std::ostream& write(std::ostream& os) const;
+
+private:
+    Arguments* m_arguments;
+    Expression* m_expression;
 };
 
 

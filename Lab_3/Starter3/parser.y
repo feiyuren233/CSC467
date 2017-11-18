@@ -111,6 +111,7 @@ enum {
 %type <as_ast> expression
 %type <as_ast> variable
 %type <as_ast> arguments
+%type <as_ast> arguments_opt
 
 // expect one shift/reduce conflict, where Bison chooses to shift
 // the ELSE.
@@ -175,8 +176,8 @@ declaration
 statement
   : variable '=' expression ';'
       { yTRACE("statement -> variable = expression ;\n") 
-        $$ = new Statement(/*static_cast<Variable*>($1), static_cast<Expression*>($3)*/
-                           new Variable(), new Expression());}
+        $$ = new Statement(static_cast<Variable*>($1), /*static_cast<Expression*>($3)*/
+                           new Expression());}
   | IF '(' expression ')' statement ELSE statement %prec WITH_ELSE
       { yTRACE("statement -> IF ( expression ) statement ELSE statement \n") 
         $$ = new Statement(/*static_cast<Expression*>($3),*/ new Expression(), 
@@ -278,23 +279,29 @@ expression
 
 variable
   : ID
-      { yTRACE("variable -> ID \n") }
+      { yTRACE("variable -> ID \n") 
+        $$ = new Variable(std::string($1));}
   | ID '[' INT_C ']' %prec '['
-      { yTRACE("variable -> ID [ INT_C ] \n") }
+      { yTRACE("variable -> ID [ INT_C ] \n") 
+        $$ = new Variable(std::string($1), yylval.as_int);}
   ;
 
 arguments
   : arguments ',' expression
-      { yTRACE("arguments -> arguments , expression \n") }
+      { yTRACE("arguments -> arguments , expression \n") 
+        $$ = new Arguments(static_cast<Arguments*>($1), static_cast<Expression*>($3));}
   | expression
-      { yTRACE("arguments -> expression \n") }
+      { yTRACE("arguments -> expression \n") 
+        $$ = new Arguments(nullptr, static_cast<Expression*>($1));}
   ;
 
 arguments_opt
   : arguments
-      { yTRACE("arguments_opt -> arguments \n") }
+      { yTRACE("arguments_opt -> arguments \n") 
+        $$ = new Arguments(static_cast<Arguments*>($1));}
   |
-      { yTRACE("arguments_opt -> \n") }
+      { yTRACE("arguments_opt -> \n") 
+        $$ = new Arguments();}
   ;
 
 %%
