@@ -187,19 +187,21 @@ type
         $$ = new Type(INT_T); }
   | IVEC_T
       { yTRACE("type -> IVEC_T \n") 
-	$$ = new Type(IVEC_T); }
+	//+1 here is because in the scanner yytext[3] - '1' instead of -'0'
+        //We could change the scanner, but it's an easy fix and I'd like to avoid changing the starter
+	$$ = new Type(IVEC_T, yylval.as_vec + 1); }
   | BOOL_T
       { yTRACE("type -> BOOL_T \n") 
         $$ = new Type(BOOL_T); }
   | BVEC_T
       { yTRACE("type -> BVEC_T \n") 
-        $$ = new Type(BVEC_T, yylval.as_vec); }
+        $$ = new Type(BVEC_T, yylval.as_vec + 1); }
   | FLOAT_T
       { yTRACE("type -> FLOAT_T \n") 
-        $$ = new Type(FLOAT_T, yylval.as_vec); }
+        $$ = new Type(FLOAT_T); }
   | VEC_T
       { yTRACE("type -> VEC_T \n") 
-        $$ = new Type(VEC_T, yylval.as_vec); }
+        $$ = new Type(VEC_T, yylval.as_vec + 1); }
   ;
 
 expression
