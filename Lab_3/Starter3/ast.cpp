@@ -205,7 +205,7 @@ LiteralExpression::LiteralExpression(int val)
         :Expression(true), m_valInt(val), m_isBool(false), m_isInt(true), m_isFloat(false) {}
 
 LiteralExpression::LiteralExpression(float val)
-        :Expression(true), m_valFloat(val), m_isBool(false), m_isInt(true), m_isFloat(false) {}
+        :Expression(true), m_valFloat(val), m_isBool(false), m_isInt(false), m_isFloat(true) {}
 
 std::ostream& LiteralExpression::write(std::ostream& os) const {
     if (m_isBool)
