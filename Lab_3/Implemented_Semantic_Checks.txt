@@ -15,6 +15,8 @@ error checking can continue.
 -Operators (type matching between operations, as per the handout)
 -Condition on IF statement, that expression be BOOL_T
 -Vector Indexing (checking index is within bounds with variable type)
+-Construction calls
+-Function calls
 
 
 

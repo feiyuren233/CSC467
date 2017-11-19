@@ -428,22 +428,69 @@ std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &o
 std::ostream& OtherExpression::populateTypeAndCheckErrors(std::ostream &os) {
     if (m_expression) m_expression->populateTypeAndCheckErrors(os);
     if (m_variable) m_variable->populateTypeAndCheckErrors(os);
-    //if (m_arguments) m_arguments->populateTypeAndCheckErrors(os);
+    if (m_arguments) m_arguments->populateTypeAndCheckErrors(os);
 
     if (m_arguments) //function-like operators
-    { //TODO: Incomplete!!!
-        if (m_typeNode) {
-            //if (!exactEqual(m_typeNode->type(), m_arguments->t))
-            setType(m_typeNode->type());
+    {
+        if (m_typeNode) { //type ( arguments_opt )
+            if ((m_typeNode->type().baseType() != ANY_T) && (m_arguments->type().baseType() != ANY_T)) {
+                if (m_arguments->type().vecSize() != 1) {
+                    foundSemanticError();
+                    os << semanticErrorHeader()
+                       << "In constructor: " << m_typeNode << " (" << m_arguments << ") "
+                       << std::endl << "Type of arguments must be basic types";
+                    setType(ANY_T);
+                }
+                else if (m_arguments->type().baseType() != m_typeNode->type().baseType()) {
+                    foundSemanticError();
+                    os << semanticErrorHeader()
+                       << "In constructor: " << m_typeNode << " (" << m_arguments << ") "
+                       << std::endl << "Base type of '" << m_typeNode->type() << "' does not match '" << m_arguments->type() << "'";
+                    setType(ANY_T);
+                }
+                else if (m_arguments->numArgs() != m_typeNode->type().vecSize()) {
+                    foundSemanticError();
+                    os << semanticErrorHeader()
+                       << "In constructor: " << m_typeNode << " (" << m_arguments << ") "
+                       << std::endl << "Number of expressions in arguments does not match size of type '"
+                       << m_typeNode->type() << "'";
+                    setType(ANY_T);
+                }
+            }
+            else setType(ANY_T);
         }
-        else {
+        else { //FUNC ( arguments_opt )
             if (m_func == RSQ) {
-                setType(FLOAT_T);
+                if (!((exactEqual(m_arguments->type(), Type(FLOAT_T)) || exactEqual(m_arguments->type(), Type(INT_T)))
+                    && m_arguments->type().vecSize() == 1)) {
+                    foundSemanticError();
+                    os << semanticErrorHeader()
+                       << "In function call: " << this
+                       << std::endl << "Arguments don't match signature 'float rsq(float|int)'";
+                    setType(ANY_T);
+                }
+                else setType(FLOAT_T);
             } else if (m_func == DP3) {
-                setType(FLOAT_T);
-                //setType(INT_T);
+                if (!(exactEqual(m_arguments->type(), Type(VEC_T, 4)) || exactEqual(m_arguments->type(), Type(VEC_T, 3)) ||
+                      exactEqual(m_arguments->type(), Type(IVEC_T, 4)) || exactEqual(m_arguments->type(), Type(IVEC_T, 3)))
+                    && !(m_arguments->type().baseType() == ANY_T) && (m_arguments->type().vecSize() != 2)) {
+                    foundSemanticError();
+                    os << semanticErrorHeader()
+                       << "In function call: " << this
+                       << std::endl
+                       << "Arguments don't match signature 'float dp3(vec4|3, vec4|3)' or 'int dp3(ivec4|3, ivec4|3";
+                    setType(ANY_T);
+                }
+                else setType(Type(m_arguments->type().baseType()));
             } else if (m_func == LIT) {
-                setType(Type(VEC_T, 4));
+                if (!exactEqual(m_arguments->type(), Type(VEC_T, 4))) {
+                    foundSemanticError();
+                    os << semanticErrorHeader()
+                       << "In function call: " << this
+                       << std::endl << "Arguments don't match signature 'vec4 lit(vec4)'";
+                    setType(ANY_T);
+                }
+                else setType(Type(VEC_T, 4));
             }
         }
     }
@@ -493,7 +540,12 @@ std::ostream& Variable::populateTypeAndCheckErrors(std::ostream &os) {
 
 // Arguments---------------------------------------
 Arguments::Arguments(Arguments* arguments, Expression* expression)
-        :m_arguments(arguments), m_expression(expression) {}
+        :m_arguments(arguments), m_expression(expression), m_numExpressions(0) {
+    if (m_expression)
+        m_numExpressions += 1;
+    if (m_arguments)
+        m_numExpressions += m_arguments->m_numExpressions;
+}
 
 Arguments::~Arguments() {
     delete m_arguments;
@@ -512,6 +564,25 @@ bool Arguments::isConstExpr() const {
 std::ostream& Arguments::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
     if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
+    return os;
+}
+
+std::ostream& Arguments::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_arguments) m_arguments->populateTypeAndCheckErrors(os);
+    if (m_expression) m_expression->populateTypeAndCheckErrors(os);
+
+    if (m_arguments && m_expression) { //arguments, expression
+        if (!exactEqual(m_arguments->type(), m_expression->type())) {
+            foundSemanticError();
+            os << semanticErrorHeader()
+               << "In arguments: " << m_arguments << ", " << m_expression
+               << "Argument types '" << m_arguments->type() << "' and '" << m_expression->type() << "' don't match";
+            setType(ANY_T);
+        } else setType(m_expression->type());
+    }
+    else if (m_expression) setType(m_expression->type());
+    else if (m_arguments) setType(m_arguments->type());
+    else setType(ANY_T);
     return os;
 }
 
@@ -573,6 +644,11 @@ bool operationEqual(Type a, int op, Type b) {
             return true;
     }
     throw std::runtime_error("Unknown operator: " + std::to_string(op));
+}
+
+bool constructorEqual(Type var, Type args, int numExpressions)
+{
+
 }
 
 bool isArithmetic(int type)

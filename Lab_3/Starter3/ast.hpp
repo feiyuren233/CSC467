@@ -280,7 +280,7 @@ private:
 };
 
 // Arguments---------------------------------------
-class Arguments : public Node
+class Arguments : public HasType
 {
 public:
     Arguments(Arguments* arguments = nullptr, Expression* expression = nullptr);
@@ -289,9 +289,12 @@ public:
 
     bool isConstExpr() const ;
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
-    //virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+
+    int numArgs() const { return m_numExpressions; }
 
 private:
+    int m_numExpressions;
     Arguments* m_arguments;
     Expression* m_expression;
 };
@@ -300,6 +303,7 @@ private:
 bool exactEqual(Type a, Type b);
 bool validUnary(int op, Type a);
 bool operationEqual(Type a, int op, Type b);
+bool constructorEqual(Type var, Type args, int numExpressions);
 bool isArithmetic(int type);
 
 
