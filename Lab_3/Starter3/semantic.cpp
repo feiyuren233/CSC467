@@ -3,6 +3,6 @@
 #include <iostream>
 
 int semantic_check(Node *ast) {
-    ast->populateSymbolTableAndCheckDeclarationErrors(std::cout);
-    return 1;
+    ast->populateSymbolTableAndCheckErrors(std::cout);
+    return ast->semanticallyCorrect()? 0 : 1;
 }

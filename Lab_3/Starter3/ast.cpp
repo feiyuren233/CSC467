@@ -45,6 +45,7 @@ std::string Node::indent(int relative) const {
 
 // Facilities for semantic checking
 SymbolTable Node::m_symbolTable;
+bool Node::m_semanticErrorFound = false;
 
 
 // Scope-------------------------------------------
@@ -65,10 +66,10 @@ std::ostream& Scope::write(std::ostream& os) const {
     return os;
 }
 
-std::ostream& Scope::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
+std::ostream& Scope::populateSymbolTableAndCheckErrors(std::ostream &os) {
     enterScope(this);
-    if (m_declarations) m_declarations->populateSymbolTableAndCheckDeclarationErrors(os);
-    if (m_statements) m_statements->populateSymbolTableAndCheckDeclarationErrors(os);
+    if (m_declarations) m_declarations->populateSymbolTableAndCheckErrors(os);
+    if (m_statements) m_statements->populateSymbolTableAndCheckErrors(os);
     exitScope();
     return os;
 }
@@ -87,9 +88,9 @@ std::ostream& Declarations::write(std::ostream &os) const {
     return os << m_declarations << m_declaration;
 }
 
-std::ostream& Declarations::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
-    if (m_declarations) m_declarations->populateSymbolTableAndCheckDeclarationErrors(os);
-    if (m_declaration) m_declaration->populateSymbolTableAndCheckDeclarationErrors(os);
+std::ostream& Declarations::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    if (m_declarations) m_declarations->populateSymbolTableAndCheckErrors(os);
+    if (m_declaration) m_declaration->populateSymbolTableAndCheckErrors(os);
     return os;
 }
 
@@ -107,9 +108,9 @@ std::ostream& Statements::write(std::ostream &os) const {
     return os << m_statements << m_statement;
 }
 
-std::ostream& Statements::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
-    if (m_statements) m_statements->populateSymbolTableAndCheckDeclarationErrors(os);
-    if (m_statement) m_statement->populateSymbolTableAndCheckDeclarationErrors(os);
+std::ostream& Statements::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    if (m_statements) m_statements->populateSymbolTableAndCheckErrors(os);
+    if (m_statement) m_statement->populateSymbolTableAndCheckErrors(os);
     return os;
 }
 
@@ -128,8 +129,9 @@ std::ostream& Declaration::write(std::ostream &os) const {
               << (m_isConst ? "const " : "") << m_typeNode << " " << m_ID << " " << m_expression;
 }
 
-std::ostream& Declaration::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
+std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_symbolTable.findElementInCurrentScope(m_ID)) {
+        foundSemanticError();
         Symbol existing_symbol = m_symbolTable.getElementInStack(m_ID);
         os << std::endl << std::endl
            << "In declaration: " << Symbol(m_isConst, m_ID, m_typeNode->type())
@@ -181,12 +183,26 @@ std::ostream& Statement::write(std::ostream &os) const {
     } else throw std::runtime_error("Statement::write: No correct sub-type of Statement found");
 }
 
-std::ostream& Statement::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
-    if (m_scope) m_scope->populateSymbolTableAndCheckDeclarationErrors(os);
-    if (m_statement) m_statement->populateSymbolTableAndCheckDeclarationErrors(os);
-    if (m_elseStatement) m_elseStatement->populateSymbolTableAndCheckDeclarationErrors(os);
+std::ostream& Statement::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    if (m_scope) m_scope->populateSymbolTableAndCheckErrors(os);
+    if (m_variable) {
+        m_variable->populateSymbolTableAndCheckErrors(os);
+        if (m_symbolTable.findElementInStack(m_variable->id())) {
+            Symbol symbol = m_symbolTable.getElementInStack(m_variable->id());
+            if (symbol.isConst()) {
+                foundSemanticError();
+                os << std::endl << std::endl
+                   << "Cannot assign const-qualified variable '" << symbol << "'"
+                   << std::endl << "Used in assignment expression: " << m_variable << " = " << m_expression;
+            }
+        }
+    }
+    if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
+    if (m_statement) m_statement->populateSymbolTableAndCheckErrors(os);
+    if (m_elseStatement) m_elseStatement->populateSymbolTableAndCheckErrors(os);
     return os;
 }
+
 
 // Type--------------------------------------------
 TypeNode::TypeNode(int _type, int vec_size)
@@ -285,6 +301,14 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
     }
 }
 
+std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
+    if (m_variable) m_variable->populateSymbolTableAndCheckErrors(os);
+    if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
+    return os;
+}
+
+
 // Variable----------------------------------------
 Variable::Variable(const std::string& _ID)
         :m_ID(_ID), m_index(0), m_isIndexPresent(false) {}
@@ -294,6 +318,15 @@ Variable::Variable(const std::string& _ID, int index)
 
 std::ostream& Variable::write(std::ostream &os) const {
     return os << m_ID << (m_isIndexPresent? ("[" + std::to_string(m_index) + "]") : "");
+}
+
+std::ostream& Variable::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    if (!m_symbolTable.findElementInStack(m_ID)) {
+        foundSemanticError();
+        os << std::endl << std::endl
+           << "Variable '" << this << "' used before being defined";
+    }
+    return os;
 }
 
 
@@ -308,6 +341,12 @@ Arguments::~Arguments() {
 
 std::ostream& Arguments::write(std::ostream &os) const {
     return os << m_arguments << ((m_arguments && m_expression)? ", " : "") << m_expression;
+}
+
+std::ostream& Arguments::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
+    if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
+    return os;
 }
 
 

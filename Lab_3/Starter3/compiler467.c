@@ -95,12 +95,12 @@ int main (int argc, char *argv[]) {
   }
 
     //Call semantic_check here before code generation, it's easier than in parser.y, and also neater after dumping AST
-    semantic_check(ast);
+    errorOccurred = (semantic_check(ast) == 1)? 1 : errorOccurred;
 
 /* Phase 4: Add code to call the code generation routine */
 /* TODO: call your code generation routine here */
   if (errorOccurred)
-    fprintf(outputFile,"Failed to compile\n");
+    fprintf(outputFile,"\n\nFailed to compile\n");
   else 
    // genCode(ast);
     ;

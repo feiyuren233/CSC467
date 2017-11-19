@@ -37,7 +37,8 @@ public:
     virtual ~Node() = default; //Analogous to free()
     virtual std::ostream& write(std::ostream& os) const { return os; }
 
-    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os) { return os; }
+    bool semanticallyCorrect() { return !m_semanticErrorFound; }
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os) { return os; }
 
 protected:
     void enterScope(const Scope* scope = nullptr) const;
@@ -52,6 +53,8 @@ protected:
 
     // Facilities for semantic checking
     static SymbolTable m_symbolTable;
+    static bool m_semanticErrorFound;
+    bool foundSemanticError() { m_semanticErrorFound = true; }
 };
 
 // Scope-------------------------------------------
@@ -62,7 +65,7 @@ public:
     virtual ~Scope();
     virtual std::ostream& write(std::ostream& os) const;
 
-    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
 
 private:
     Declarations* m_declarations;
@@ -77,7 +80,7 @@ public:
     virtual ~Declarations();
     virtual std::ostream& write(std::ostream& os) const;
 
-    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
 
 private:
     Declarations* m_declarations;
@@ -92,7 +95,7 @@ public:
     virtual ~Statements();
     virtual std::ostream& write(std::ostream& os) const;
 
-    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
 
 private:
     Statements* m_statements;
@@ -107,7 +110,7 @@ public:
     virtual ~Declaration();
     virtual std::ostream& write(std::ostream& os) const;
 
-    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
 
 private:
     bool m_isConst;
@@ -126,7 +129,7 @@ public:
     virtual ~Statement();
     virtual std::ostream& write(std::ostream& os) const;
 
-    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
 
 private:
     Scope* m_scope;
@@ -218,6 +221,8 @@ public:
     virtual ~OtherExpression();
     virtual std::ostream& write(std::ostream& os) const;
 
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+
 private:
     Expression* m_expression;
     Variable* m_variable;
@@ -235,6 +240,9 @@ public:
     virtual ~Variable() = default;
     virtual std::ostream& write(std::ostream& os) const;
 
+    std::string id() const {return m_ID;}
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+
 private:
     const std::string m_ID;
     int m_index;
@@ -248,6 +256,8 @@ public:
     Arguments(Arguments* arguments = nullptr, Expression* expression = nullptr);
     virtual ~Arguments();
     virtual std::ostream& write(std::ostream& os) const;
+
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
 
 private:
     Arguments* m_arguments;
