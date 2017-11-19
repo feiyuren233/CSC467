@@ -1,5 +1,6 @@
 /***********************************************************************
- * **YOUR GROUP INFO SHOULD GO HERE**
+ * 	Eva Bernal 1002252313 bernalev
+ *  Ramon Sibello 999753253 sibellov
  *
  * globalvars.c
  *
