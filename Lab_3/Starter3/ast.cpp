@@ -14,6 +14,7 @@
 
 Node* ast = nullptr;
 
+// Facilities for printing AST
 int Node::m_writeScopeLevel = 0;
 int Node::m_writeIfLevel = 0;
 
@@ -142,11 +143,21 @@ std::ostream& Statement::write(std::ostream &os) const {
         }
         exitIf();
         return os;
-    } else throw 0; //TODO: See about throwing an informative exception here
+    } else throw std::runtime_error("Statement::write: No correct sub-type of Statement found");
 }
 
 
 // Type--------------------------------------------
+Type::Type(Type *type) {
+    if (!type)
+        throw std::runtime_error("Type copy-ish-constructed from NULL");
+    else {
+        m_enumGivenType = type->m_enumGivenType;
+        m_baseType = type->m_baseType;
+        m_vecSize = type->m_vecSize;
+    }
+}
+
 Type::Type(int _type, int vec_size)
         :m_enumGivenType(_type), m_vecSize(vec_size), m_baseType(0) {
     if (m_vecSize == 1)
@@ -163,7 +174,7 @@ Type::Type(int _type, int vec_size)
                 m_baseType = INT_T;
                 break;
             default:
-                throw 0;  //TODO: See about throwing an informative exception here
+                throw std::runtime_error("Type constructed with unknown _type: " + std::to_string(_type));
         }
     }
 }

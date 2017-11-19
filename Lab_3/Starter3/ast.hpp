@@ -3,6 +3,7 @@
 #define AST_H_ 1
 
 #include <stdarg.h>
+#include <string>
 #include <iostream>
 
 // Dummy node just so everything compiles, create your own node/nodes
@@ -122,6 +123,7 @@ private:
 class Type : public Node
 {
 public:
+    Type(Type* type);
     Type(int _type, int vec_size = 1);
     virtual std::ostream& write(std::ostream& os) const;
 
