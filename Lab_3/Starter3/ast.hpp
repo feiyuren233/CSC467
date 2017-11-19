@@ -37,6 +37,7 @@ public:
     virtual ~Node() = default; //Analogous to free()
     virtual std::ostream& write(std::ostream& os) const { return os; }
 
+    void setParserInfo(int line_num);
     void setParserInfo(int line_num, const char* text);
     bool semanticallyCorrect() { return !m_semanticErrorFound; }
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os) { return os; }

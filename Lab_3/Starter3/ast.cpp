@@ -14,6 +14,10 @@
 
 Node* ast = nullptr;
 
+void Node::setParserInfo(int line_num) {
+    m_parserLineNum = line_num;
+}
+
 void Node::setParserInfo(int line_num, const char *text) {
     m_parserLineNum = line_num;
     //m_parserTextNum = line - text;
