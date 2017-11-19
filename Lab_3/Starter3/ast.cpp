@@ -148,19 +148,19 @@ std::ostream& Statement::write(std::ostream &os) const {
 
 // Type--------------------------------------------
 Type::Type(int _type, int vec_size)
-        :m_enumGivenType(_type), m_vecSize(vec_size) {
+        :m_enumGivenType(_type), m_vecSize(vec_size), m_baseType(0) {
     if (m_vecSize == 1)
-        m_primaryType = m_enumGivenType;
+        m_baseType = m_enumGivenType;
     else {
         switch (_type) {
             case VEC_T:
-                m_primaryType = FLOAT_T;
+                m_baseType = FLOAT_T;
                 break;
             case BVEC_T:
-                m_primaryType = BOOL_T;
+                m_baseType = BOOL_T;
                 break;
             case IVEC_T:
-                m_primaryType = INT_T;
+                m_baseType = INT_T;
                 break;
             default:
                 throw 0;  //TODO: See about throwing an informative exception here

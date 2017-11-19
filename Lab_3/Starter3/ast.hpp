@@ -35,6 +35,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const = 0;
 
 protected:
+    // Facilities for printing AST
     static int m_writeScopeLevel;
     static int m_writeIfLevel;
     void enterScope() const;
@@ -42,6 +43,8 @@ protected:
     void enterIf() const;
     void exitIf() const;
     std::string indent(int relative = 0) const;
+
+    
 };
 
 // Scope-------------------------------------------
@@ -125,7 +128,7 @@ public:
 
 private:
     int m_enumGivenType;
-    int m_primaryType;
+    int m_baseType;
     int m_vecSize;
 };
 
