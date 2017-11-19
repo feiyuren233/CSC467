@@ -171,7 +171,7 @@ std::ostream& Declaration::populateTypeAndCheckErrors(std::ostream &os) {
             os << std::endl << std::endl
                << "In declaration: " << this
                << std::endl << "Assignment expression of type '" << m_expression->type()
-               << "' does not match variable's type '" <<  m_typeNode->type();
+               << "' does not match variable's type '" <<  m_typeNode->type() << "'";
         }
     }
     return os;
@@ -251,8 +251,8 @@ std::ostream& Statement::populateTypeAndCheckErrors(std::ostream &os) {
             foundSemanticError();
             os << std::endl << std::endl
                << "In assignment expression: " << m_variable << " = " << m_expression
-               << std::endl << "Assignment expression of type '" << m_expression->type()
-               << "' does not match variable's type '" <<  m_variable->type();
+               << std::endl << "Assignment-expression '" << m_expression << "' of type '" << m_expression->type()
+               << "' does not match variable's type '" <<  m_variable->type() << "'";
         }
     }
     else if (m_expression && m_statement) {//if statement
@@ -320,7 +320,7 @@ std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) 
         os << std::endl << std::endl
            << "In expression: " << this
            << std::endl <<"Type of right-hand-side operand '" << m_rhs->type()
-           << "' does not match left-hand-side operand of type '" << m_lhs->type();
+           << "' does not match left-hand-side operand of type '" << m_lhs->type() << "'";
         setType(ANY_T);
     }
     else if (m_rhs && !validUnary(m_operator, m_rhs->type())) {
