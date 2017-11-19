@@ -23,6 +23,7 @@ class Statements;
 class Declaration;
 class Statement;
 class Type;
+class HasType;
 class Expression;
 class Variable;
 class Arguments;
@@ -32,7 +33,7 @@ class Node
 {
 public:
     virtual ~Node() = default; //Analogous to free()
-    virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual std::ostream& write(std::ostream& os) const { return os; };
 
 protected:
     // Facilities for printing AST
@@ -132,13 +133,23 @@ private:
     int m_vecSize;
 };
 
-// Expression--------------------------------------
-class Expression : public Node
+class HasType : public Node
 {
 public:
-    Expression(bool is_constexpr = false) :m_isConstExpr(is_constexpr) {}
+    HasType();
+    virtual ~HasType() = default;
+
+protected:
+    void setType(int _type, int vec_size = 1);
+    Type m_type;
+};
+
+// Expression--------------------------------------
+class Expression : public HasType
+{
+public:
+    Expression(bool is_constexpr = false);
     virtual ~Expression() = default;
-    virtual std::ostream& write(std::ostream& os) const {return os;};
 
     bool isConstExpr() { return m_isConstExpr;}
 
@@ -199,7 +210,7 @@ private:
 };
 
 // Variable----------------------------------------
-class Variable : public Node
+class Variable : public HasType
 {
 public:
     Variable(const std::string& _ID);

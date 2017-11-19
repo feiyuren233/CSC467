@@ -171,13 +171,19 @@ Type::Type(int _type, int vec_size)
 std::ostream& Type::write(std::ostream &os) const {
     std::map<int, std::string> type_enum_to_string{
             {FLOAT_T, "float"}, {INT_T, "int"}, {BOOL_T, "bool"},
-            {VEC_T, "vec"}, {IVEC_T, "ivec"}, {BVEC_T, "bvec"}};
+            {VEC_T, "vec"}, {IVEC_T, "ivec"}, {BVEC_T, "bvec"},
+            {ANY_T, "ANY"}};
 
     return os << type_enum_to_string[m_enumGivenType] << ((m_vecSize > 1)? std::to_string(m_vecSize) : "");
 }
 
+HasType::HasType() :m_type(Type(ANY_T)) {}
+
 
 // Expression--------------------------------------
+Expression::Expression(bool is_constexpr)
+        :HasType(), m_isConstExpr(is_constexpr) {}
+
 OperationExpression::OperationExpression(int _op, Expression *rhs)
         :Expression(rhs->isConstExpr()), m_lhs(nullptr), m_rhs(rhs), m_operator(_op) {}
 

@@ -77,6 +77,9 @@ enum {
 %token          IF ELSE
 %token          AND OR NEQ EQ LEQ GEQ
 
+//ANY_T defined here so that it's present in 'parser.h' and can be used as a type
+%token          ANY_T 
+
 // links specific values of tokens to yyval
 %token <as_vec>   VEC_T
 %token <as_vec>   BVEC_T
