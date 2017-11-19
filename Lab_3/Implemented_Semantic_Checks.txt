@@ -5,7 +5,7 @@ Populates the SymbolTable and check for a number of errors. If there are multipl
 
 -Variable only declared once per scope
 -Variable declared before it is used
--const qualified variables not used in assignment statement
+-const qualified variables not used in left-hand-side of assignment statement
 
 populateTypeAndCheckErrors----------------------------------
 Populates the type of HasType nodes bottom-up, and checks a number of errors (also buttom-up). If there is an error and a type can't be deduced for a HasType node, it will be set to ANY_T, so that
@@ -14,6 +14,7 @@ error checking can continue.
 -Implicit type conversions (no type mismatch)
 -Operators (type matching between operations, as per the handout)
 -Condition on IF statement, that expression be BOOL_T
+-Vector Indexing (checking index is within bounds with variable type)
 
 
 

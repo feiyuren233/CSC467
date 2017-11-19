@@ -39,6 +39,7 @@ public:
 
     bool semanticallyCorrect() { return !m_semanticErrorFound; }
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os) { return os; }
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os) { return os; }
 
 protected:
     void enterScope(const Scope* scope = nullptr) const;
@@ -54,7 +55,7 @@ protected:
     // Facilities for semantic checking
     static SymbolTable m_symbolTable;
     static bool m_semanticErrorFound;
-    bool foundSemanticError() { m_semanticErrorFound = true; }
+    void foundSemanticError() { m_semanticErrorFound = true; }
 };
 
 // Scope-------------------------------------------
@@ -66,6 +67,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const;
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     Declarations* m_declarations;
@@ -81,6 +83,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const;
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     Declarations* m_declarations;
@@ -96,6 +99,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const;
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     Statements* m_statements;
@@ -111,6 +115,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const;
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     bool m_isConst;
@@ -130,6 +135,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const;
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     Scope* m_scope;
@@ -157,6 +163,7 @@ class HasType : public Node
 public:
     HasType();
     virtual ~HasType() = default;
+    Type type() { return m_type; }
 
 protected:
     void setType(Type type);
@@ -171,7 +178,7 @@ public:
     Expression(bool is_constexpr = false);
     virtual ~Expression() = default;
 
-    bool isConstExpr() { return m_isConstExpr;}
+    bool isConstExpr() const { return m_isConstExpr;}
 
 protected:
     bool m_isConstExpr;
@@ -185,10 +192,14 @@ public:
     virtual ~OperationExpression();
     virtual std::ostream& write(std::ostream& os) const;
 
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+
 private:
     Expression* m_lhs;
     Expression* m_rhs;
     int m_operator;
+
+    static std::map<int, std::string> m_op_to_string;
 };
 
 class LiteralExpression : public Expression
@@ -198,6 +209,8 @@ public:
     explicit LiteralExpression(int val);
     explicit LiteralExpression(float val);
     virtual std::ostream& write(std::ostream& os) const;
+
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     bool m_isBool;
@@ -222,6 +235,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const;
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     Expression* m_expression;
@@ -229,6 +243,13 @@ private:
     Arguments* m_arguments;
     TypeNode* m_typeNode;
     int m_func;
+
+    enum {
+        DP3 = 0,
+        LIT = 1,
+        RSQ = 2
+    };
+    static std::map<int, std::string> m_func_to_string;
 };
 
 // Variable----------------------------------------
@@ -242,6 +263,7 @@ public:
 
     std::string id() const {return m_ID;}
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     const std::string m_ID;
@@ -257,13 +279,20 @@ public:
     virtual ~Arguments();
     virtual std::ostream& write(std::ostream& os) const;
 
+    bool isConstExpr() const ;
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
+    //virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
     Arguments* m_arguments;
     Expression* m_expression;
 };
 
+
+bool exactEqual(Type a, Type b);
+bool validUnary(int op, Type a);
+bool operationEqual(Type a, int op, Type b);
+bool isArithmetic(int type);
 
 
 std::ostream& operator<<(std::ostream& os, const Node* node);

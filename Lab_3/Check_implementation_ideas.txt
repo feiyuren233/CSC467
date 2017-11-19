@@ -1,5 +1,0 @@
-[1] Add a isAssigned element to Symbol, and set true if a variable is assigned in construction, or once an assignmenet statement is found. If that variable is used, check the isAssigned parameter and report error if it's not set.
-
-[2] I have set constExpr for literals, and propagated it. If a variable isConst, it's also a constExpr, so set this up. Then for initialization of const variables just check that expression is constExpr.
-
-

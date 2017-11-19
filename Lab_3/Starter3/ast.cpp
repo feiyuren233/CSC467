@@ -27,6 +27,7 @@ void Node::exitScope() const {
 // Facilities for printing AST
 int Node::m_writeScopeLevel = 0;
 int Node::m_writeIfLevel = 0;
+
 void Node::enterIf() const {
     m_writeIfLevel++;
 }
@@ -74,6 +75,14 @@ std::ostream& Scope::populateSymbolTableAndCheckErrors(std::ostream &os) {
     return os;
 }
 
+std::ostream& Scope::populateTypeAndCheckErrors(std::ostream &os) {
+    enterScope(this);
+    if (m_declarations) m_declarations->populateTypeAndCheckErrors(os);
+    if (m_statements) m_statements->populateTypeAndCheckErrors(os);
+    exitScope();
+    return os;
+}
+
 
 // Declarations------------------------------------
 Declarations::Declarations(Declarations *declarations, Declaration *declaration)
@@ -94,6 +103,12 @@ std::ostream& Declarations::populateSymbolTableAndCheckErrors(std::ostream &os) 
     return os;
 }
 
+std::ostream& Declarations::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_declarations) m_declarations->populateTypeAndCheckErrors(os);
+    if (m_declaration) m_declaration->populateTypeAndCheckErrors(os);
+    return os;
+}
+
 
 // Statements--------------------------------------
 Statements::Statements(Statements* statements, Statement* statement)
@@ -111,6 +126,12 @@ std::ostream& Statements::write(std::ostream &os) const {
 std::ostream& Statements::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_statements) m_statements->populateSymbolTableAndCheckErrors(os);
     if (m_statement) m_statement->populateSymbolTableAndCheckErrors(os);
+    return os;
+}
+
+std::ostream& Statements::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_statements) m_statements->populateTypeAndCheckErrors(os);
+    if (m_statement) m_statement->populateTypeAndCheckErrors(os);
     return os;
 }
 
@@ -142,6 +163,21 @@ std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
     return os;
 }
 
+std::ostream& Declaration::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_expression) {
+        m_expression->populateTypeAndCheckErrors(os);
+        if (!exactEqual(m_expression->type(), m_typeNode->type())) {
+            foundSemanticError();
+            os << std::endl << std::endl
+               << "In declaration: " << this
+               << std::endl << "Assignment expression of type '" << m_expression->type()
+               << "' does not match variable's type '" <<  m_typeNode->type();
+        }
+    }
+    return os;
+}
+
+
 // Statement---------------------------------------
 Statement::Statement(Scope *scope)
         :m_scope(scope),
@@ -168,9 +204,9 @@ std::ostream& Statement::write(std::ostream &os) const {
         return os;
     else if (m_scope)
         return os << m_scope;
-    else if (m_variable && m_expression)
+    else if (m_variable && m_expression) //variable = expression
         return os << std::endl << indent(1) << m_variable << " = " << m_expression;
-    else if (m_expression && m_statement) {
+    else if (m_expression && m_statement) { //if statement
         enterIf();
         os << std::endl << indent(0) << "IF ( " << m_expression << " )"
            << m_statement;
@@ -192,14 +228,41 @@ std::ostream& Statement::populateSymbolTableAndCheckErrors(std::ostream &os) {
             if (symbol.isConst()) {
                 foundSemanticError();
                 os << std::endl << std::endl
-                   << "Cannot assign const-qualified variable '" << symbol << "'"
-                   << std::endl << "Used in assignment expression: " << m_variable << " = " << m_expression;
+                   << "In assignment expression: " << m_variable << " = " << m_expression
+                   << std::endl << "Cannot assign const-qualified variable '" << symbol << "'";
             }
         }
     }
     if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
     if (m_statement) m_statement->populateSymbolTableAndCheckErrors(os);
     if (m_elseStatement) m_elseStatement->populateSymbolTableAndCheckErrors(os);
+    return os;
+}
+
+std::ostream& Statement::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_scope) m_scope->populateTypeAndCheckErrors(os);
+    if (m_variable) m_variable->populateTypeAndCheckErrors(os);
+    if (m_expression) m_expression->populateTypeAndCheckErrors(os);
+    if (m_statement) m_statement->populateTypeAndCheckErrors(os);
+    if (m_elseStatement) m_elseStatement->populateTypeAndCheckErrors(os);
+
+    if (m_variable && m_expression) {//variable = expression
+        if (!exactEqual(m_variable->type(), m_expression->type())) {
+            foundSemanticError();
+            os << std::endl << std::endl
+               << "In assignment expression: " << m_variable << " = " << m_expression
+               << std::endl << "Assignment expression of type '" << m_expression->type()
+               << "' does not match variable's type '" <<  m_variable->type();
+        }
+    }
+    else if (m_expression && m_statement) {//if statement
+        if (!exactEqual(m_expression->type(), Type(BOOL_T))) {
+            foundSemanticError();
+            os << std::endl << std::endl
+               << "In if statement: IF (" << m_expression << ") "
+               << std::endl << "The expression '" << m_expression << "' is not BOOL_T";
+        }
+    }
     return os;
 }
 
@@ -227,6 +290,12 @@ void HasType::setType(int _type, int vec_size) {
 Expression::Expression(bool is_constexpr)
         :HasType(), m_isConstExpr(is_constexpr) {}
 
+
+std::map<int, std::string> OperationExpression::m_op_to_string {
+        {AND, "&&"}, {OR, "||"}, {EQ, "=="}, {NEQ, "!="}, {LEQ, "<="}, {GEQ, ">="},
+        {'<', "<"}, {'>', ">"}, {'+', "+"}, {'-', "-"}, {'*', "*"}, {'/', "/"}, {'^', "^"},
+        {UMINUS, "-"}, {'!', "!"}};
+
 OperationExpression::OperationExpression(int _op, Expression *rhs)
         :Expression(rhs->isConstExpr()), m_lhs(nullptr), m_rhs(rhs), m_operator(_op) {}
 
@@ -239,13 +308,32 @@ OperationExpression::~OperationExpression() {
 }
 
 std::ostream& OperationExpression::write(std::ostream &os) const {
-    std::map<int, std::string> op_to_string{
-            {AND, "&&"}, {OR, "||"}, {EQ, "=="}, {NEQ, "!="}, {LEQ, "<="}, {GEQ, ">="},
-            {'<', "<"}, {'>', ">"}, {'+', "+"}, {'-', "-"}, {'*', "*"}, {'/', "/"}, {'^', "^"},
-            {UMINUS, "-"}, {'!', "!"}};
-
-    return os << m_lhs << (m_lhs? " " : "") << op_to_string[m_operator] << (m_lhs? " " : "") << m_rhs;
+    return os << m_lhs << (m_lhs? " " : "") << m_op_to_string[m_operator] << (m_lhs? " " : "") << m_rhs;
 }
+
+std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_lhs) m_lhs->populateTypeAndCheckErrors(os);
+    if (m_rhs) m_rhs->populateTypeAndCheckErrors(os);
+
+    if (m_lhs && m_rhs && !operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
+        foundSemanticError();
+        os << std::endl << std::endl
+           << "In expression: " << this
+           << std::endl <<"Type of right-hand-side operand '" << m_rhs->type()
+           << "' does not match left-hand-side operand of type '" << m_lhs->type();
+        setType(ANY_T);
+    }
+    else if (m_rhs && !validUnary(m_operator, m_rhs->type())) {
+        foundSemanticError();
+        os << std::endl << std::endl
+           << "In unary expression: " << this
+           << std::endl << "Type of operand '" << m_rhs->type()
+           << "' is not valid for operator '" << m_op_to_string[m_operator] << "'";
+        setType(ANY_T);
+    }
+    return os;
+}
+
 
 LiteralExpression::LiteralExpression(bool val)
         :Expression(true), m_valBool(val), m_isBool(true), m_isInt(false), m_isFloat(false) {}
@@ -264,6 +352,19 @@ std::ostream& LiteralExpression::write(std::ostream& os) const {
     else if (m_isFloat)
         return os << m_valFloat;
 }
+
+std::ostream& LiteralExpression::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_isBool)
+        setType(BOOL_T);
+    else if (m_isInt)
+        setType(INT_T);
+    else if (m_isFloat);
+        setType(FLOAT_T);
+    return os;
+}
+
+
+std::map<int, std::string> OtherExpression::m_func_to_string{{DP3, "dp3"}, {LIT, "lit"}, {RSQ, "rsq"}};
 
 OtherExpression::OtherExpression(Expression* expression)
         :Expression(expression->isConstExpr()), m_expression(expression),
@@ -295,16 +396,43 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
         return os << m_variable;
     else if (m_typeNode)
         return os << m_typeNode << " ( " << m_arguments << " ) ";
-    else {
-        std::map<int, std::string> func_to_string{ {0, "dp3"}, {1, "lit"}, {2, "rsq"}};
-        return os << func_to_string[m_func] << " ( " << m_arguments << " ) ";
-    }
+    else
+        return os << m_func_to_string[m_func] << " ( " << m_arguments << " ) ";
 }
 
 std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
     if (m_variable) m_variable->populateSymbolTableAndCheckErrors(os);
     if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
+    return os;
+}
+
+std::ostream& OtherExpression::populateTypeAndCheckErrors(std::ostream &os) {
+    if (m_expression) m_expression->populateTypeAndCheckErrors(os);
+    if (m_variable) m_variable->populateTypeAndCheckErrors(os);
+    if (m_arguments) m_arguments->populateTypeAndCheckErrors(os);
+
+    if (m_arguments) //function-like operators
+    { //TODO: Incomplete!!!
+        if (m_typeNode) {
+            //if (!exactEqual(m_typeNode->type(), m_arguments->t))
+            setType(m_typeNode->type());
+        }
+        else {
+            if (m_func == RSQ) {
+                setType(FLOAT_T);
+            } else if (m_func == DP3) {
+                setType(FLOAT_T);
+                //setType(INT_T);
+            } else if (m_func == LIT) {
+                setType(Type(VEC_T, 4));
+            }
+        }
+    }
+    else if (m_expression)
+        setType(m_expression->type());
+    else if (m_variable)
+        setType(m_variable->type());
     return os;
 }
 
@@ -325,7 +453,22 @@ std::ostream& Variable::populateSymbolTableAndCheckErrors(std::ostream &os) {
         foundSemanticError();
         os << std::endl << std::endl
            << "Variable '" << this << "' used before being defined";
+        //Push variable of
+        m_symbolTable.pushElement(Symbol(false, m_ID, Type(ANY_T)));
     }
+    return os;
+}
+
+std::ostream& Variable::populateTypeAndCheckErrors(std::ostream &os) {
+    Symbol symbol = m_symbolTable.getElementInStack(m_ID); //Guaranteed to be there, at least with ANY_T
+    if (m_isIndexPresent && !(0 <= m_index && m_index < symbol.type().vecSize())) {
+        foundSemanticError();
+        os << std::endl << std::endl
+           << "In variable: " << this
+           << std::endl << "Access is out of bounds of the variable type '" << symbol.type() << "'";
+        setType(ANY_T);
+    }
+    else setType(symbol.type());
     return os;
 }
 
@@ -343,6 +486,11 @@ std::ostream& Arguments::write(std::ostream &os) const {
     return os << m_arguments << ((m_arguments && m_expression)? ", " : "") << m_expression;
 }
 
+bool Arguments::isConstExpr() const {
+    return (m_expression? m_expression->isConstExpr() : true) &&
+           (m_arguments? m_arguments->isConstExpr() : true);
+}
+
 std::ostream& Arguments::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
     if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
@@ -350,6 +498,69 @@ std::ostream& Arguments::populateSymbolTableAndCheckErrors(std::ostream &os) {
 }
 
 
+
+bool exactEqual(Type a, Type b) {
+    if (a.baseType() == ANY_T || b.baseType() == ANY_T)
+        return true;
+    else return (a.enumGivenType() == b.enumGivenType() &&
+                 a.baseType() == b.baseType() &&
+                 a.vecSize() == a.vecSize());
+}
+
+bool validUnary(int op, Type a) {
+    if (op == '!') //Unary Logical, base type of b must be bool
+        return a.baseType() == BOOL_T;
+    else if (op == UMINUS) //Unary negative, base type must be arithmetic
+        return isArithmetic(a.baseType());
+    throw std::runtime_error("Unknown unary operator: " + std::to_string(op));
+}
+
+bool operationEqual(Type a, int op, Type b) {
+    if (a.baseType() == ANY_T || b.baseType() == ANY_T)
+        return true;
+
+    //Binary operations, operands must have same base type, and if both are vectors they must have the same size
+    if (a.baseType() != b.baseType() ||
+        (a.vecSize() > 1 && b.vecSize() > 1 && a.vecSize() != b.vecSize()))
+        return false;
+
+    //Binary arithmetic operations, both operands must have arithmetic base types
+    if (op == '+' || op == '-' || op == '*' || op == '/' || op == '^') {
+        if (!(isArithmetic(a.baseType()) && isArithmetic(b.baseType())))
+            return false;
+
+        if (op == '+' || op == '-') //Binary add/sub, operands must have the same arithmetic base type, and vec_size
+            return isArithmetic(a.baseType()) && isArithmetic(b.baseType()) && a.vecSize() == b.vecSize();
+
+        else if (op == '*') //Mult, no new restrictions
+            return true;
+
+        if (op == '/' || op == '^') //Operands must be scalars
+            return a.vecSize() == 1 && b.vecSize() == 1;
+    }
+    else if (op == AND || op == OR) //Binary logical, both operands must have base type bool, and same vec_size
+        return a.baseType() == BOOL_T && b.baseType() == BOOL_T && (a.vecSize() == b.vecSize());
+    //Binary comparison, must have arithmetic type, and same vec_size
+    else if (op == '<' || op == LEQ || op == '>' || op == GEQ || op == EQ || op == NEQ) {
+        if (!(isArithmetic(a.baseType()) && isArithmetic(b.baseType())) ||
+            (a.vecSize() != b.vecSize()))
+            return false;
+
+        //Must be scalar
+        if (op == '<' || op == LEQ || op == '>' || op == GEQ)
+            return a.vecSize() == 1 && b.vecSize() == 1;
+
+        // No new restrictions
+        if (op == EQ || op == NEQ)
+            return true;
+    }
+    throw std::runtime_error("Unknown operator: " + std::to_string(op));
+}
+
+bool isArithmetic(int type)
+{
+    return type == INT_T || type == FLOAT_T;
+}
 
 
 std::ostream& operator<<(std::ostream& os, const Node* node) {
