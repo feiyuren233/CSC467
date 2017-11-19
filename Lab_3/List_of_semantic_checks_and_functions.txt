@@ -1,0 +1,19 @@
+Semantic check functions and the errors they check:
+
+populateSymbolTableAndCheckErrors ------------
+Populates the SymbolTable and check for a number of errors. If there are multiple declarations for the same variable in the same scope, the error is reported reported and the variable is take to be of the first type declared for the rest of semantic checking. If a variable is used before being declared, the error is reported, and a non-const variable with the same ID and ANY type is pushed on the SymbolTable so that error checking can continue.
+
+-Variable only declared once per scope
+-Variable declared before it is used
+-const qualified variables not used in assignment statement
+
+populateTypeAndCheckErrors----------------------------------
+Populates the type of HasType nodes bottom-up, and checks a number of errors (also buttom-up). If there is an error and a type can't be deduced for a HasType node, it will be set to ANY_T, so that
+error checking can continue.
+
+-Implicit type conversions (no type mismatch)
+-Operators (type matching between operations, as per the handout)
+-Condition on IF statement, that expression be BOOL_T
+
+
+
