@@ -1,0 +1,17 @@
+{
+	/*examples of operator use that is not supported*/
+	int myInt = 2;
+	bool myBool = false;
+	int myInt1 = 2;
+	bool myBool1 = false;
+	int myInt2 = 2;
+	bool myBool2 = false;
+
+	if(myBool || myInt) myInt = 3; /*non boolean logical operand*/
+
+	myInt1 = myBool1 + 2;/*non arithmetic arithmetic operand*/
+
+	if(myBool2 > myInt2);/*non arithmetic comparison operand*/
+
+
+}
