@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <string>
 #include <iostream>
+#include "symbol.hpp"
 
 // Dummy node just so everything compiles, create your own node/nodes
 //
@@ -23,7 +24,7 @@ class Declarations;
 class Statements;
 class Declaration;
 class Statement;
-class Type;
+class TypeNode;
 class HasType;
 class Expression;
 class Variable;
@@ -35,6 +36,7 @@ class Node
 public:
     virtual ~Node() = default; //Analogous to free()
     virtual std::ostream& write(std::ostream& os) const { return os; };
+    //virtual std::ostream& semanticCheck(std::ostream& os);
 
 protected:
     // Facilities for printing AST
@@ -45,6 +47,9 @@ protected:
     void enterIf() const;
     void exitIf() const;
     std::string indent(int relative = 0) const;
+
+    // Facilities for semantic checking
+    //virtual std::ostream& populateAndCheckTypes(std::ostream& os);
 };
 
 // Scope-------------------------------------------
@@ -90,13 +95,13 @@ private:
 class Declaration : public Node
 {
 public:
-    Declaration(bool isConst, Type* type, const std::string& _ID, Expression* expression= nullptr);
+    Declaration(bool isConst, TypeNode* typeNode, const std::string& _ID, Expression* expression= nullptr);
     virtual ~Declaration();
     virtual std::ostream& write(std::ostream& os) const;
 
 private:
     bool m_isConst;
-    Type* m_type;
+    TypeNode* m_typeNode;
     const std::string m_ID;
     Expression* m_expression;
 };
@@ -119,18 +124,15 @@ private:
     Statement* m_elseStatement;
 };
 
-// Type--------------------------------------------
-class Type : public Node
+// TypeNode----------------------------------------
+class TypeNode : public Node
 {
 public:
-    Type(Type* type);
-    Type(int _type, int vec_size = 1);
+    TypeNode(int _type, int vec_size = 1);
     virtual std::ostream& write(std::ostream& os) const;
 
 private:
-    int m_enumGivenType;
-    int m_baseType;
-    int m_vecSize;
+    Type m_type;
 };
 
 // To aid in semantics checking, meant to be inherited from by any Node that has a type
@@ -141,6 +143,7 @@ public:
     virtual ~HasType() = default;
 
 protected:
+    void setType(Type type);
     void setType(int _type, int vec_size = 1);
     Type m_type;
 };
@@ -197,7 +200,7 @@ class OtherExpression : public Expression
 public:
     OtherExpression(Expression* expression);
     OtherExpression(Variable* variable);
-    OtherExpression(Type* _type, Arguments* arguments);
+    OtherExpression(TypeNode* _type, Arguments* arguments);
     OtherExpression(int func, Arguments* arguments);
     virtual ~OtherExpression();
     virtual std::ostream& write(std::ostream& os) const;
@@ -206,7 +209,7 @@ private:
     Expression* m_expression;
     Variable* m_variable;
     Arguments* m_arguments;
-    Type* m_type;
+    TypeNode* m_typeNode;
     int m_func;
 };
 

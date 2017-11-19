@@ -177,14 +177,14 @@ statements
 declaration
   : type ID ';' 
       { yTRACE("declaration -> type ID ;\n")
-        $$ = new Declaration(false, static_cast<Type*>($1), std::string($2)); }
+        $$ = new Declaration(false, static_cast<TypeNode*>($1), std::string($2)); }
   | type ID '=' expression ';'
       { yTRACE("declaration -> type ID = expression ;\n")
-        $$ = new Declaration(false, static_cast<Type*>($1), 
+        $$ = new Declaration(false, static_cast<TypeNode*>($1), 
                              std::string($2), static_cast<Expression*>($4)); }
   | CONST type ID '=' expression ';'
       { yTRACE("declaration -> CONST type ID = expression ;\n")
-        $$ = new Declaration(true, static_cast<Type*>($2), 
+        $$ = new Declaration(true, static_cast<TypeNode*>($2), 
                              std::string($3), static_cast<Expression*>($5)); }
   ;
 
@@ -212,24 +212,24 @@ statement
 type
   : INT_T
       { yTRACE("type -> INT_T \n") 
-        $$ = new Type(INT_T); }
+        $$ = new TypeNode(INT_T); }
   | IVEC_T
       { yTRACE("type -> IVEC_T \n") 
 	//+1 here is because in the scanner yytext[3] - '1' instead of -'0'
         //We could change the scanner, but it's an easy fix and I'd like to avoid changing the starter
-	$$ = new Type(IVEC_T, yylval.as_vec + 1); }
+	$$ = new TypeNode(IVEC_T, yylval.as_vec + 1); }
   | BOOL_T
       { yTRACE("type -> BOOL_T \n") 
-        $$ = new Type(BOOL_T); }
+        $$ = new TypeNode(BOOL_T); }
   | BVEC_T
       { yTRACE("type -> BVEC_T \n") 
-        $$ = new Type(BVEC_T, yylval.as_vec + 1); }
+        $$ = new TypeNode(BVEC_T, yylval.as_vec + 1); }
   | FLOAT_T
       { yTRACE("type -> FLOAT_T \n") 
-        $$ = new Type(FLOAT_T); }
+        $$ = new TypeNode(FLOAT_T); }
   | VEC_T
       { yTRACE("type -> VEC_T \n") 
-        $$ = new Type(VEC_T, yylval.as_vec + 1); }
+        $$ = new TypeNode(VEC_T, yylval.as_vec + 1); }
   ;
 
 expression
@@ -237,7 +237,7 @@ expression
   /* function-like operators */
   : type '(' arguments_opt ')' %prec '('
       { yTRACE("expression -> type ( arguments_opt ) \n") 
-        $$ = new OtherExpression(static_cast<Type*>($1), static_cast<Arguments*>($3));}
+        $$ = new OtherExpression(static_cast<TypeNode*>($1), static_cast<Arguments*>($3));}
   | FUNC '(' arguments_opt ')' %prec '('
       { yTRACE("expression -> FUNC ( arguments_opt ) \n") 
         $$ = new OtherExpression($1, static_cast<Arguments*>($3));}

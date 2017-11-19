@@ -7,7 +7,22 @@
 #include <vector>
 #include <exception>
 
-#include "ast.hpp"
+class Type
+{
+public:
+    Type(int _type, int vec_size = 1);
+
+    int enumGivenType() const {return m_enumGivenType;}
+    int baseType() const {return m_baseType;}
+    int vecSize() const {return m_vecSize;}
+
+private:
+    int m_enumGivenType;
+    int m_baseType;
+    int m_vecSize;
+
+    static int getBaseType(int _type, int vec_size);
+};
 
 struct Symbol
 {

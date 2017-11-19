@@ -3,7 +3,29 @@
 #include <stdio.h>
 
 #include "symbol.hpp"
+//This is here because otherwise we get 'Node does not name a type' issue since 'parser.h' doesn't include 'ast.hpp'
+#include "ast.hpp"
 #include "parser.h"
+
+Type::Type(int _type, int vec_size)
+        :m_enumGivenType(_type), m_vecSize(vec_size), m_baseType(getBaseType(_type, vec_size)) {}
+
+int Type::getBaseType(int _type, int vec_size) {
+    if (vec_size == 1)
+        return _type;
+    else {
+        switch (_type) {
+            case VEC_T:
+                return FLOAT_T;
+            case BVEC_T:
+               return BOOL_T;
+            case IVEC_T:
+                return INT_T;
+            default:
+                throw std::runtime_error("Type constructed with unknown _type: " + std::to_string(_type));
+        }
+    }
+}
 
 Symbol::Symbol() :m_type(ANY_T) {}
 

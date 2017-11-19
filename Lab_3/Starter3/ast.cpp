@@ -91,17 +91,17 @@ std::ostream& Statements::write(std::ostream &os) const {
 
 
 // Declaration-------------------------------------
-Declaration::Declaration(bool isConst, Type* type, const std::string& _ID, Expression* expression)
-        :Node(), m_isConst(isConst), m_type(type), m_ID(_ID), m_expression(expression) {}
+Declaration::Declaration(bool isConst, TypeNode* type, const std::string& _ID, Expression* expression)
+        :Node(), m_isConst(isConst), m_typeNode(type), m_ID(_ID), m_expression(expression) {}
 
 Declaration::~Declaration() {
-    delete m_type;
+    delete m_typeNode;
     delete m_expression;
 }
 
 std::ostream& Declaration::write(std::ostream &os) const {
     return os << std::endl << indent(1)
-              << (m_isConst ? "const " : "") << m_type << " " << m_ID << " " << m_expression;
+              << (m_isConst ? "const " : "") << m_typeNode << " " << m_ID << " " << m_expression;
 }
 
 
@@ -148,47 +148,24 @@ std::ostream& Statement::write(std::ostream &os) const {
 
 
 // Type--------------------------------------------
-Type::Type(Type *type) {
-    if (!type)
-        throw std::runtime_error("Type copy-ish-constructed from NULL");
-    else {
-        m_enumGivenType = type->m_enumGivenType;
-        m_baseType = type->m_baseType;
-        m_vecSize = type->m_vecSize;
-    }
-}
+TypeNode::TypeNode(int _type, int vec_size)
+        :m_type(_type, vec_size) {}
 
-Type::Type(int _type, int vec_size)
-        :m_enumGivenType(_type), m_vecSize(vec_size), m_baseType(0) {
-    if (m_vecSize == 1)
-        m_baseType = m_enumGivenType;
-    else {
-        switch (_type) {
-            case VEC_T:
-                m_baseType = FLOAT_T;
-                break;
-            case BVEC_T:
-                m_baseType = BOOL_T;
-                break;
-            case IVEC_T:
-                m_baseType = INT_T;
-                break;
-            default:
-                throw std::runtime_error("Type constructed with unknown _type: " + std::to_string(_type));
-        }
-    }
-}
-
-std::ostream& Type::write(std::ostream &os) const {
+std::ostream& TypeNode::write(std::ostream &os) const {
     std::map<int, std::string> type_enum_to_string{
             {FLOAT_T, "float"}, {INT_T, "int"}, {BOOL_T, "bool"},
             {VEC_T, "vec"}, {IVEC_T, "ivec"}, {BVEC_T, "bvec"},
             {ANY_T, "ANY"}};
 
-    return os << type_enum_to_string[m_enumGivenType] << ((m_vecSize > 1)? std::to_string(m_vecSize) : "");
+    return os << type_enum_to_string[m_type.enumGivenType()]
+              << ((m_type.vecSize() > 1)? std::to_string(m_type.vecSize()) : "");
 }
 
 HasType::HasType() :m_type(Type(ANY_T)) {}
+
+void HasType::setType(Type type) {
+    m_type = type;
+}
 
 void HasType::setType(int _type, int vec_size) {
     m_type = Type(_type, vec_size);
@@ -239,25 +216,25 @@ std::ostream& LiteralExpression::write(std::ostream& os) const {
 
 OtherExpression::OtherExpression(Expression* expression)
         :Expression(expression->isConstExpr()), m_expression(expression),
-         m_variable(nullptr), m_arguments(nullptr), m_type(nullptr), m_func(-1) {}
+         m_variable(nullptr), m_arguments(nullptr), m_typeNode(nullptr), m_func(-1) {}
 
 OtherExpression::OtherExpression(Variable* variable)
         :Expression(false), m_variable(variable),
-         m_expression(nullptr), m_arguments(nullptr), m_type(nullptr), m_func(-1) {}
+         m_expression(nullptr), m_arguments(nullptr), m_typeNode(nullptr), m_func(-1) {}
 
-OtherExpression::OtherExpression(Type* _type, Arguments* arguments)
-        :Expression(false), m_type(_type), m_arguments(arguments),
+OtherExpression::OtherExpression(TypeNode* _type, Arguments* arguments)
+        :Expression(false), m_typeNode(_type), m_arguments(arguments),
          m_expression(nullptr), m_variable(nullptr), m_func(-1) {}
 
 OtherExpression::OtherExpression(int func, Arguments* arguments)
         :Expression(false), m_func(func), m_arguments(arguments),
-         m_expression(nullptr), m_variable(nullptr), m_type(nullptr) {}
+         m_expression(nullptr), m_variable(nullptr), m_typeNode(nullptr) {}
 
 OtherExpression::~OtherExpression() {
     delete m_expression;
     delete m_variable;
     delete m_arguments;
-    delete m_type;
+    delete m_typeNode;
 }
 
 std::ostream& OtherExpression::write(std::ostream &os) const {
@@ -265,8 +242,8 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
         return os << "( " << m_expression << " )";
     else if (m_variable)
         return os << m_variable;
-    else if (m_type)
-        return os << m_type << " ( " << m_arguments << " ) ";
+    else if (m_typeNode)
+        return os << m_typeNode << " ( " << m_arguments << " ) ";
     else {
         std::map<int, std::string> func_to_string{ {0, "dp3"}, {1, "lit"}, {2, "rsq"}};
         return os << func_to_string[m_func] << " ( " << m_arguments << " ) ";
