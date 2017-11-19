@@ -37,6 +37,7 @@ public:
     virtual ~Node() = default; //Analogous to free()
     virtual std::ostream& write(std::ostream& os) const { return os; }
 
+    void setParserInfo(int line_num, const char* text);
     bool semanticallyCorrect() { return !m_semanticErrorFound; }
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os) { return os; }
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os) { return os; }
@@ -56,6 +57,12 @@ protected:
     static SymbolTable m_symbolTable;
     static bool m_semanticErrorFound;
     void foundSemanticError() { m_semanticErrorFound = true; }
+
+    std::string semanticErrorHeader() const;
+    int m_parserLineNum;
+    //unsigned long m_parserTextNum;
+    //std::string m_parserLine;
+    std::string m_parserText;
 };
 
 // Scope-------------------------------------------

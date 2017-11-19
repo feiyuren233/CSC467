@@ -14,6 +14,13 @@
 
 Node* ast = nullptr;
 
+void Node::setParserInfo(int line_num, const char *text) {
+    m_parserLineNum = line_num;
+    //m_parserTextNum = line - text;
+    //m_parserLine = std::string(line);
+    m_parserText = std::string(text);
+}
+
 void Node::enterScope(const Scope* scope) const {
     m_writeScopeLevel++;
     m_symbolTable.enterScope(scope);
@@ -47,6 +54,10 @@ std::string Node::indent(int relative) const {
 // Facilities for semantic checking
 SymbolTable Node::m_symbolTable;
 bool Node::m_semanticErrorFound = false;
+
+std::string Node::semanticErrorHeader() const {
+    return "\n\n" + std::to_string(m_parserLineNum) + ": " + m_parserText + "\n";
+}
 
 
 // Scope-------------------------------------------
@@ -154,7 +165,7 @@ std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_symbolTable.findElementInCurrentScope(m_ID)) {
         foundSemanticError();
         Symbol existing_symbol = m_symbolTable.getElementInStack(m_ID);
-        os << std::endl << std::endl
+        os << semanticErrorHeader()
            << "In declaration: " << Symbol(m_isConst, m_ID, m_typeNode->type())
            << std::endl << "'" << m_ID << "'" << " already declared in this scope: "
            << existing_symbol;
@@ -168,7 +179,7 @@ std::ostream& Declaration::populateTypeAndCheckErrors(std::ostream &os) {
         m_expression->populateTypeAndCheckErrors(os);
         if (!exactEqual(m_expression->type(), m_typeNode->type())) {
             foundSemanticError();
-            os << std::endl << std::endl
+            os << semanticErrorHeader()
                << "In declaration: " << this
                << std::endl << "Assignment expression of type '" << m_expression->type()
                << "' does not match variable's type '" <<  m_typeNode->type() << "'";
@@ -227,7 +238,7 @@ std::ostream& Statement::populateSymbolTableAndCheckErrors(std::ostream &os) {
             Symbol symbol = m_symbolTable.getElementInStack(m_variable->id());
             if (symbol.isConst()) {
                 foundSemanticError();
-                os << std::endl << std::endl
+                os << semanticErrorHeader()
                    << "In assignment expression: " << m_variable << " = " << m_expression
                    << std::endl << "Cannot assign const-qualified variable '" << symbol << "'";
             }
@@ -249,7 +260,7 @@ std::ostream& Statement::populateTypeAndCheckErrors(std::ostream &os) {
     if (m_variable && m_expression) {//variable = expression
         if (!exactEqual(m_variable->type(), m_expression->type())) {
             foundSemanticError();
-            os << std::endl << std::endl
+            os << semanticErrorHeader()
                << "In assignment expression: " << m_variable << " = " << m_expression
                << std::endl << "Assignment-expression '" << m_expression << "' of type '" << m_expression->type()
                << "' does not match variable's type '" <<  m_variable->type() << "'";
@@ -258,7 +269,7 @@ std::ostream& Statement::populateTypeAndCheckErrors(std::ostream &os) {
     else if (m_expression && m_statement) {//if statement
         if (!exactEqual(m_expression->type(), Type(BOOL_T))) {
             foundSemanticError();
-            os << std::endl << std::endl
+            os << semanticErrorHeader()
                << "In if statement: IF (" << m_expression << ") "
                << std::endl << "The expression '" << m_expression << "' is not BOOL_T";
         }
@@ -315,22 +326,25 @@ std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) 
     if (m_lhs) m_lhs->populateTypeAndCheckErrors(os);
     if (m_rhs) m_rhs->populateTypeAndCheckErrors(os);
 
-    if (m_lhs && m_rhs && !operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
+    if (m_lhs && m_rhs) {
+        if (!operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
         foundSemanticError();
-        os << std::endl << std::endl
+        os << semanticErrorHeader()
            << "In expression: " << this
-           << std::endl <<"Type of right-hand-side operand '" << m_rhs->type()
+           << std::endl << "Type of right-hand-side operand '" << m_rhs->type()
            << "' does not match left-hand-side operand of type '" << m_lhs->type() << "'";
         setType(ANY_T);
+        }
     }
-    else if (m_rhs && !validUnary(m_operator, m_rhs->type())) {
+    else if (!validUnary(m_operator, m_rhs->type())) {
         foundSemanticError();
-        os << std::endl << std::endl
+        os << semanticErrorHeader()
            << "In unary expression: " << this
            << std::endl << "Type of operand '" << m_rhs->type()
            << "' is not valid for operator '" << m_op_to_string[m_operator] << "'";
         setType(ANY_T);
     }
+    else setType(m_rhs->type());
     return os;
 }
 
@@ -358,7 +372,7 @@ std::ostream& LiteralExpression::populateTypeAndCheckErrors(std::ostream &os) {
         setType(BOOL_T);
     else if (m_isInt)
         setType(INT_T);
-    else if (m_isFloat);
+    else if (m_isFloat)
         setType(FLOAT_T);
     return os;
 }
@@ -410,7 +424,7 @@ std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &o
 std::ostream& OtherExpression::populateTypeAndCheckErrors(std::ostream &os) {
     if (m_expression) m_expression->populateTypeAndCheckErrors(os);
     if (m_variable) m_variable->populateTypeAndCheckErrors(os);
-    if (m_arguments) m_arguments->populateTypeAndCheckErrors(os);
+    //if (m_arguments) m_arguments->populateTypeAndCheckErrors(os);
 
     if (m_arguments) //function-like operators
     { //TODO: Incomplete!!!
@@ -451,7 +465,7 @@ std::ostream& Variable::write(std::ostream &os) const {
 std::ostream& Variable::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (!m_symbolTable.findElementInStack(m_ID)) {
         foundSemanticError();
-        os << std::endl << std::endl
+        os << semanticErrorHeader()
            << "Variable '" << this << "' used before being defined";
         //Push variable of
         m_symbolTable.pushElement(Symbol(false, m_ID, Type(ANY_T)));
@@ -463,7 +477,7 @@ std::ostream& Variable::populateTypeAndCheckErrors(std::ostream &os) {
     Symbol symbol = m_symbolTable.getElementInStack(m_ID); //Guaranteed to be there, at least with ANY_T
     if (m_isIndexPresent && !(0 <= m_index && m_index < symbol.type().vecSize())) {
         foundSemanticError();
-        os << std::endl << std::endl
+        os << semanticErrorHeader()
            << "In variable: " << this
            << std::endl << "Access is out of bounds of the variable type '" << symbol.type() << "'";
         setType(ANY_T);
@@ -512,7 +526,7 @@ bool validUnary(int op, Type a) {
         return a.baseType() == BOOL_T;
     else if (op == UMINUS) //Unary negative, base type must be arithmetic
         return isArithmetic(a.baseType());
-    throw std::runtime_error("Unknown unary operator: " + std::to_string(op));
+    throw std::runtime_error("validUnary: Unknown unary operator: " + std::to_string(op));
 }
 
 bool operationEqual(Type a, int op, Type b) {
