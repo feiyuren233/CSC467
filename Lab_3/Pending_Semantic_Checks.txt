@@ -5,4 +5,6 @@ Initialization ------------------------- pg6 [2]
 I have set constExpr for literals, and propagated it. If a variable isConst, it's also a constExpr, so set this up. Then for initialization of const variables just check that expression is constExpr.
 
 Pre-Defined Variables ------------------ pg7
+Add components to SymbolTable to implement isPreDefinedResult, isPreDefinedAttribute, etc. Where there are checks for variables in scopes, etc. check these first. Or, add extra information to symbol to capture the behavior of 'result', 'attribute', etc. and push these into a scope ZERO. You may need to do both, actually. 
+
 Reporting Bonuses ---------------------- pg8

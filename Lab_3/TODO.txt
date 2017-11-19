@@ -1,0 +1,1 @@
+[] Change ast_print and semantic_check to pass an std::ostream to whatever files is required, not simply std::cout
