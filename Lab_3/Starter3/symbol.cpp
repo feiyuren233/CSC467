@@ -27,12 +27,25 @@ int Type::getBaseType(int _type, int vec_size) {
     }
 }
 
+std::ostream& Type::write(std::ostream &os) const {
+    std::map<int, std::string> type_enum_to_string{
+            {FLOAT_T, "float"}, {INT_T, "int"}, {BOOL_T, "bool"},
+            {VEC_T, "vec"}, {IVEC_T, "ivec"}, {BVEC_T, "bvec"},
+            {ANY_T, "ANY"}};
+
+    return os << type_enum_to_string[m_enumGivenType]
+              << ((m_vecSize > 1)? std::to_string(m_vecSize) : "");
+}
+
 Symbol::Symbol()
         :m_isConst(false), m_type(ANY_T) {}
 
-Symbol::Symbol(bool _isConst, std::string &_id, Type _type)
+Symbol::Symbol(bool _isConst, const std::string &_id, Type _type)
         :m_isConst(_isConst), m_ID(_id), m_type(_type) {}
 
+std::ostream& Symbol::write(std::ostream &os) const {
+    return os << (m_isConst ? "const " : "") << m_type << " " << m_ID;
+}
 
 //SymbolTable ----------------------------------------------------
 SymbolTable::SymbolTable()
@@ -55,7 +68,7 @@ SymbolScope& SymbolTable::currentScope() {
     return m_currentScopeStack.back().second;
 }
 
-bool SymbolTable::findElementInStack(std::string& _ID) {
+bool SymbolTable::findElementInStack(const std::string& _ID) {
     for (auto id_scope = m_currentScopeStack.rbegin(); id_scope != m_currentScopeStack.rend(); id_scope++) {
         if (id_scope->second.find(_ID) != id_scope->second.end())
             return true;
@@ -63,7 +76,7 @@ bool SymbolTable::findElementInStack(std::string& _ID) {
     return false;
 }
 
-bool SymbolTable::findElementInCurrentScope(std::string &_ID) {
+bool SymbolTable::findElementInCurrentScope(const std::string &_ID) {
     return (currentScope().find(_ID) != currentScope().end());
 }
 
@@ -71,10 +84,18 @@ void SymbolTable::pushElement(Symbol element) {
     currentScope()[element.id()] = element;
 }
 
-Symbol SymbolTable::getElementInStack(std::string &_ID) {
+Symbol SymbolTable::getElementInStack(const std::string &_ID) {
     for (auto id_scope = m_currentScopeStack.rbegin(); id_scope != m_currentScopeStack.rend(); id_scope++) {
         if (id_scope->second.find(_ID) != id_scope->second.end())
             return id_scope->second.at(_ID);
     }
     throw std::runtime_error("SymbolTable::getElement: Symbol " + _ID + " not found in symbol table");
+}
+
+
+std::ostream& operator<<(std::ostream& os, const Type type) {
+    return type.write(os);
+}
+std::ostream& operator<<(std::ostream& os, const Symbol symbol) {
+    return symbol.write(os);
 }

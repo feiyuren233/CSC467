@@ -1,6 +1,8 @@
 
 #include "semantic.hpp"
+#include <iostream>
 
 int semantic_check(Node *ast) {
-  return 0; // failed checks
+    ast->populateSymbolTableAndCheckDeclarationErrors(std::cout);
+    return 1;
 }

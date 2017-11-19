@@ -16,6 +16,8 @@ public:
     int baseType() const {return m_baseType;}
     int vecSize() const {return m_vecSize;}
 
+    std::ostream& write(std::ostream& os) const;
+
 private:
     int m_enumGivenType;
     int m_baseType;
@@ -28,11 +30,13 @@ class Symbol
 {
 public:
     Symbol();
-    Symbol(bool _isConst, std::string& _id, Type _type);
+    Symbol(bool _isConst, const std::string& _id, Type _type);
 
     bool isConst() const {return m_isConst;}
     std::string id() const {return m_ID;}
     Type type() const {return m_type;}
+
+    std::ostream& write(std::ostream& os) const;
 
 private:
     bool m_isConst;
@@ -41,7 +45,7 @@ private:
 };
 
 class Scope;
-typedef Scope* ScopeID;
+typedef const Scope* ScopeID;
 typedef std::map<std::string, Symbol> SymbolScope;
 typedef std::map<ScopeID, SymbolScope> SymbolTableCache;
 typedef std::pair<ScopeID, SymbolScope> IDScopePair;
@@ -54,16 +58,19 @@ public:
     void exitScope();
     SymbolScope& currentScope(); //May throw if no scope has been entered yet
 
-    bool findElementInStack(std::string& _ID);
-    bool findElementInCurrentScope(std::string& _ID);
+    bool findElementInStack(const std::string& _ID);
+    bool findElementInCurrentScope(const std::string& _ID);
     void pushElement(Symbol element); //Overwrites an element if exists
-    Symbol getElementInStack(std::string& _ID); //May throw if element not found, call findElement first
+    Symbol getElementInStack(const std::string& _ID); //May throw if element not found, call findElement first
 
 private:
     ScopeID m_currentScopeID;
     std::vector<IDScopePair> m_currentScopeStack;
     SymbolTableCache m_cache;
 };
+
+std::ostream& operator<<(std::ostream& os, const Type type);
+std::ostream& operator<<(std::ostream& os, const Symbol symbol);
 
 #endif
 

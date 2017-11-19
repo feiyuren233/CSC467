@@ -14,18 +14,19 @@
 
 Node* ast = nullptr;
 
-// Facilities for printing AST
-int Node::m_writeScopeLevel = 0;
-int Node::m_writeIfLevel = 0;
-
-void Node::enterScope() const {
+void Node::enterScope(const Scope* scope) const {
     m_writeScopeLevel++;
+    m_symbolTable.enterScope(scope);
 }
 
 void Node::exitScope() const {
     m_writeScopeLevel--;
+    m_symbolTable.exitScope();
 }
 
+// Facilities for printing AST
+int Node::m_writeScopeLevel = 0;
+int Node::m_writeIfLevel = 0;
 void Node::enterIf() const {
     m_writeIfLevel++;
 }
@@ -42,6 +43,9 @@ std::string Node::indent(int relative) const {
     return ret;
 }
 
+// Facilities for semantic checking
+SymbolTable Node::m_symbolTable;
+
 
 // Scope-------------------------------------------
 Scope::Scope(Declarations *declarations, Statements *statements)
@@ -53,10 +57,18 @@ Scope::~Scope() {
 }
 
 std::ostream& Scope::write(std::ostream& os) const {
-    enterScope();
+    enterScope(this);
     os << std::endl << indent(0) << "SCOPE ("
        << std::endl << indent(0) << "DECLARATIONS (" << m_declarations << ")"
        << std::endl << indent(0) << "STATEMENTS (" << m_statements << ")";
+    exitScope();
+    return os;
+}
+
+std::ostream& Scope::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
+    enterScope(this);
+    if (m_declarations) m_declarations->populateSymbolTableAndCheckDeclarationErrors(os);
+    if (m_statements) m_statements->populateSymbolTableAndCheckDeclarationErrors(os);
     exitScope();
     return os;
 }
@@ -75,6 +87,12 @@ std::ostream& Declarations::write(std::ostream &os) const {
     return os << m_declarations << m_declaration;
 }
 
+std::ostream& Declarations::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
+    if (m_declarations) m_declarations->populateSymbolTableAndCheckDeclarationErrors(os);
+    if (m_declaration) m_declaration->populateSymbolTableAndCheckDeclarationErrors(os);
+    return os;
+}
+
 
 // Statements--------------------------------------
 Statements::Statements(Statements* statements, Statement* statement)
@@ -87,6 +105,12 @@ Statements::~Statements() {
 
 std::ostream& Statements::write(std::ostream &os) const {
     return os << m_statements << m_statement;
+}
+
+std::ostream& Statements::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
+    if (m_statements) m_statements->populateSymbolTableAndCheckDeclarationErrors(os);
+    if (m_statement) m_statement->populateSymbolTableAndCheckDeclarationErrors(os);
+    return os;
 }
 
 
@@ -104,6 +128,17 @@ std::ostream& Declaration::write(std::ostream &os) const {
               << (m_isConst ? "const " : "") << m_typeNode << " " << m_ID << " " << m_expression;
 }
 
+std::ostream& Declaration::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
+    if (m_symbolTable.findElementInCurrentScope(m_ID)) {
+        Symbol existing_symbol = m_symbolTable.getElementInStack(m_ID);
+        os << std::endl << std::endl
+           << "In declaration: " << Symbol(m_isConst, m_ID, m_typeNode->type())
+           << std::endl << "'" << m_ID << "'" << " already declared in this scope: "
+           << existing_symbol;
+    }
+    else m_symbolTable.pushElement(Symbol(m_isConst, m_ID, m_typeNode->type()));
+    return os;
+}
 
 // Statement---------------------------------------
 Statement::Statement(Scope *scope)
@@ -146,19 +181,19 @@ std::ostream& Statement::write(std::ostream &os) const {
     } else throw std::runtime_error("Statement::write: No correct sub-type of Statement found");
 }
 
+std::ostream& Statement::populateSymbolTableAndCheckDeclarationErrors(std::ostream &os) {
+    if (m_scope) m_scope->populateSymbolTableAndCheckDeclarationErrors(os);
+    if (m_statement) m_statement->populateSymbolTableAndCheckDeclarationErrors(os);
+    if (m_elseStatement) m_elseStatement->populateSymbolTableAndCheckDeclarationErrors(os);
+    return os;
+}
 
 // Type--------------------------------------------
 TypeNode::TypeNode(int _type, int vec_size)
         :m_type(_type, vec_size) {}
 
 std::ostream& TypeNode::write(std::ostream &os) const {
-    std::map<int, std::string> type_enum_to_string{
-            {FLOAT_T, "float"}, {INT_T, "int"}, {BOOL_T, "bool"},
-            {VEC_T, "vec"}, {IVEC_T, "ivec"}, {BVEC_T, "bvec"},
-            {ANY_T, "ANY"}};
-
-    return os << type_enum_to_string[m_type.enumGivenType()]
-              << ((m_type.vecSize() > 1)? std::to_string(m_type.vecSize()) : "");
+    return os << m_type;
 }
 
 HasType::HasType() :m_type(Type(ANY_T)) {}

@@ -35,21 +35,23 @@ class Node
 {
 public:
     virtual ~Node() = default; //Analogous to free()
-    virtual std::ostream& write(std::ostream& os) const { return os; };
-    //virtual std::ostream& semanticCheck(std::ostream& os);
+    virtual std::ostream& write(std::ostream& os) const { return os; }
+
+    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os) { return os; }
 
 protected:
+    void enterScope(const Scope* scope = nullptr) const;
+    void exitScope() const;
+
     // Facilities for printing AST
     static int m_writeScopeLevel;
     static int m_writeIfLevel;
-    void enterScope() const;
-    void exitScope() const;
     void enterIf() const;
     void exitIf() const;
     std::string indent(int relative = 0) const;
 
     // Facilities for semantic checking
-    //virtual std::ostream& populateAndCheckTypes(std::ostream& os);
+    static SymbolTable m_symbolTable;
 };
 
 // Scope-------------------------------------------
@@ -59,6 +61,8 @@ public:
     Scope(Declarations* declarations, Statements* statements);
     virtual ~Scope();
     virtual std::ostream& write(std::ostream& os) const;
+
+    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
 
 private:
     Declarations* m_declarations;
@@ -73,6 +77,8 @@ public:
     virtual ~Declarations();
     virtual std::ostream& write(std::ostream& os) const;
 
+    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+
 private:
     Declarations* m_declarations;
     Declaration* m_declaration;
@@ -86,6 +92,8 @@ public:
     virtual ~Statements();
     virtual std::ostream& write(std::ostream& os) const;
 
+    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+
 private:
     Statements* m_statements;
     Statement* m_statement;
@@ -98,6 +106,8 @@ public:
     Declaration(bool isConst, TypeNode* typeNode, const std::string& _ID, Expression* expression= nullptr);
     virtual ~Declaration();
     virtual std::ostream& write(std::ostream& os) const;
+
+    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
 
 private:
     bool m_isConst;
@@ -116,6 +126,8 @@ public:
     virtual ~Statement();
     virtual std::ostream& write(std::ostream& os) const;
 
+    virtual std::ostream& populateSymbolTableAndCheckDeclarationErrors(std::ostream& os);
+
 private:
     Scope* m_scope;
     Variable* m_variable;
@@ -131,6 +143,7 @@ public:
     TypeNode(int _type, int vec_size = 1);
     virtual std::ostream& write(std::ostream& os) const;
 
+    Type type() { return m_type; }
 private:
     Type m_type;
 };

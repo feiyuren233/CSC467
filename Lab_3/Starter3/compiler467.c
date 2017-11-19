@@ -25,6 +25,7 @@
 
 /* Phases 3,4: Uncomment following includes as needed */
 #include "ast.hpp"
+#include "semantic.hpp"
 //#include "codegen.h"
 
 /***********************************************************************
@@ -89,8 +90,13 @@ int main (int argc, char *argv[]) {
   }
 
 /* Phase 3: Call the AST dumping routine if requested */
-  if (dumpAST)
-    ast_print(ast);
+  if (dumpAST) {
+      ast_print(ast);
+  }
+
+    //Call semantic_check here before code generation, it's easier than in parser.y, and also neater after dumping AST
+    semantic_check(ast);
+
 /* Phase 4: Add code to call the code generation routine */
 /* TODO: call your code generation routine here */
   if (errorOccurred)
