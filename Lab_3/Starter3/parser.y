@@ -117,15 +117,6 @@ enum {
 %type <as_ast> arguments
 %type <as_ast> arguments_opt
 
-%type  <as_int> OR                        // 7
-%type  <as_int> AND                       // 6
-%type  <as_int> EQ NEQ '<' LEQ '>' GEQ    // 5
-%type  <as_int> '+' '-'                   // 4
-%type  <as_int> '*' '/'                   // 3
-%type  <as_int> '^'                       // 2
-%type  <as_int> '!' UMINUS                // 1
-%type  <as_int> '(' '['                   // 0
-
 %type  <as_int> FUNC
 
 // expect one shift/reduce conflict, where Bison chooses to shift
@@ -253,43 +244,43 @@ expression
   /* binary operators */
   | expression AND expression %prec AND
       { yTRACE("expression -> expression AND expression \n") 
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), AND, static_cast<Expression*>($3));}
   | expression OR expression %prec OR
       { yTRACE("expression -> expression OR expression \n") 
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3)); }
+        $$ = new OperationExpression(static_cast<Expression*>($1), OR, static_cast<Expression*>($3)); }
   | expression EQ expression %prec EQ
       { yTRACE("expression -> expression EQ expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), EQ, static_cast<Expression*>($3));}
   | expression NEQ expression %prec NEQ
       { yTRACE("expression -> expression NEQ expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), NEQ, static_cast<Expression*>($3));}
   | expression '<' expression %prec '<'
       { yTRACE("expression -> expression < expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), '<', static_cast<Expression*>($3));}
   | expression LEQ expression %prec LEQ
       { yTRACE("expression -> expression LEQ expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), LEQ, static_cast<Expression*>($3));}
   | expression '>' expression %prec '>'
       { yTRACE("expression -> expression > expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), '>', static_cast<Expression*>($3));}
   | expression GEQ expression %prec GEQ
       { yTRACE("expression -> expression GEQ expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), GEQ, static_cast<Expression*>($3));}
   | expression '+' expression %prec '+'
       { yTRACE("expression -> expression + expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), '+', static_cast<Expression*>($3));}
   | expression '-' expression %prec '-'
       { yTRACE("expression -> expression - expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), '-', static_cast<Expression*>($3));}
   | expression '*' expression %prec '*'
       { yTRACE("expression -> expression * expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), '*', static_cast<Expression*>($3));}
   | expression '/' expression %prec '/'
       { yTRACE("expression -> expression / expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), '/', static_cast<Expression*>($3));}
   | expression '^' expression %prec '^'
       { yTRACE("expression -> expression ^ expression \n")  
-        $$ = new OperationExpression(static_cast<Expression*>($1), $2, static_cast<Expression*>($3));}
+        $$ = new OperationExpression(static_cast<Expression*>($1), '^', static_cast<Expression*>($3));}
 
   /* literals */
   | TRUE_C
