@@ -199,8 +199,8 @@ private:
 class Variable : public Node
 {
 public:
-    Variable(const std::string& ID);
-    Variable(const std::string& ID, int index);
+    Variable(const std::string& _ID);
+    Variable(const std::string& _ID, int index);
     virtual ~Variable() = default;
     virtual std::ostream& write(std::ostream& os) const;
 

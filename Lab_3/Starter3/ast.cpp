@@ -253,11 +253,11 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
 }
 
 // Variable----------------------------------------
-Variable::Variable(const std::string& ID)
-        :m_ID(ID), m_index(0), m_isIndexPresent(false) {}
+Variable::Variable(const std::string& _ID)
+        :m_ID(_ID), m_index(0), m_isIndexPresent(false) {}
 
-Variable::Variable(const std::string& ID, int index)
-        :m_ID(ID), m_index(index), m_isIndexPresent(true) {}
+Variable::Variable(const std::string& _ID, int index)
+        :m_ID(_ID), m_index(index), m_isIndexPresent(true) {}
 
 std::ostream& Variable::write(std::ostream &os) const {
     return os << m_ID << (m_isIndexPresent? ("[" + std::to_string(m_index) + "]") : "");
