@@ -332,11 +332,15 @@ std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) 
 
     if (m_lhs && m_rhs) {
         if (!operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
-        foundSemanticError();
-        os << semanticErrorHeader()
-           << "In expression: " << this
-           << std::endl << "Type of right-hand-side operand '" << m_rhs->type()
-           << "' does not match left-hand-side operand of type '" << m_lhs->type() << "'";
+            foundSemanticError();
+            os << semanticErrorHeader()
+               << "In expression: " << this << std::endl;
+            if (equalButInvalidBooleanComparison(m_lhs->type(), m_operator, m_rhs->type())) {
+                os << "Comparison of 'bool' types is not allowed (see lab3 handout)";
+            } else {
+                os << "Type of right-hand-side operand '" << m_rhs->type()
+                   << "' does not match left-hand-side operand of type '" << m_lhs->type() << "'";
+            }
         setType(ANY_T);
         }
     }
@@ -533,7 +537,11 @@ std::ostream& Variable::populateTypeAndCheckErrors(std::ostream &os) {
            << std::endl << "Access is out of bounds of the variable type '" << symbol.type() << "'";
         setType(ANY_T);
     }
-    else setType(symbol.type());
+    else {
+        if (m_isIndexPresent)
+            setType(symbol.type().baseType());
+        else setType(symbol.type());
+    }
     return os;
 }
 
@@ -646,9 +654,14 @@ bool operationEqual(Type a, int op, Type b) {
     throw std::runtime_error("Unknown operator: " + std::to_string(op));
 }
 
-bool constructorEqual(Type var, Type args, int numExpressions)
+bool equalButInvalidBooleanComparison(Type a, int op, Type b)
 {
-
+    if ((op == EQ || op == NEQ)
+        && a.baseType() == BOOL_T && b.baseType() == BOOL_T
+        && a.vecSize() == b.vecSize()
+        && !operationEqual(a, op, b))
+        return true;
+    else return false;
 }
 
 bool isArithmetic(int type)

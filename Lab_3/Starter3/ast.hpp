@@ -303,7 +303,7 @@ private:
 bool exactEqual(Type a, Type b);
 bool validUnary(int op, Type a);
 bool operationEqual(Type a, int op, Type b);
-bool constructorEqual(Type var, Type args, int numExpressions);
+bool equalButInvalidBooleanComparison(Type a, int op, Type b);
 bool isArithmetic(int type);
 
 
