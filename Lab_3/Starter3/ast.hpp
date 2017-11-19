@@ -44,8 +44,6 @@ protected:
     void enterIf() const;
     void exitIf() const;
     std::string indent(int relative = 0) const;
-
-    
 };
 
 // Scope-------------------------------------------
@@ -133,6 +131,7 @@ private:
     int m_vecSize;
 };
 
+// To aid in semantics checking, meant to be inherited from by any Node that has a type
 class HasType : public Node
 {
 public:

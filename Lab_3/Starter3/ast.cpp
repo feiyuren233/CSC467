@@ -179,6 +179,10 @@ std::ostream& Type::write(std::ostream &os) const {
 
 HasType::HasType() :m_type(Type(ANY_T)) {}
 
+void HasType::setType(int _type, int vec_size) {
+    m_type = Type(_type, vec_size);
+}
+
 
 // Expression--------------------------------------
 Expression::Expression(bool is_constexpr)
