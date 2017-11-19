@@ -31,6 +31,7 @@ int ParseIdent(void);
 int yyline = 1;
 
 %}
+%option yylineno
 %option noyywrap
 
 %%
