@@ -183,7 +183,7 @@ protected:
 class Expression : public HasType
 {
 public:
-    Expression(bool is_constexpr = false);
+    Expression() :m_isConstExpr(false) {}
     virtual ~Expression() = default;
 
     bool isConstExpr() const { return m_isConstExpr;}
@@ -270,6 +270,7 @@ public:
     virtual std::ostream& write(std::ostream& os) const;
 
     std::string id() const {return m_ID;}
+    bool isConstExpr() const; //May throw if called before populating symbol table
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 

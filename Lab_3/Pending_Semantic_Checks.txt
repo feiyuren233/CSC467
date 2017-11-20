@@ -1,8 +1,3 @@
-Initialization ------------------------- pg6 [2]
-I have set constExpr for literals, and propagated it. If a variable isConst, it's also a constExpr, so set this up. Then for initialization of const variables just check that expression is constExpr.
--> f_initialization.txt
--> f_pre-defined_variables.txt (const vec4 b= gl_Secondary;)
-
 Variables Bonus ------------------------ pg7 [1]
 Add a isAssigned element to Symbol, and set true if a variable is assigned in construction, or once an assignmenet statement is found. If that variable is used, check the isAssigned parameter and report error if it's not set.
 
@@ -11,6 +6,13 @@ Reporting Bonuses ---------------------- pg8
 -column number
 -contextual messages
 
+__________________________________________________________________________________________________
+
 Pre-Defined Variables ------------------ pg7
 -Done, except below
 -the "cannot be assigned anywhere in the scope of an if or else statement" is confusing
+
+Initialization ------------------------- pg6 [2]
+-> f_initialization.txt
+-> f_pre-defined_variables.txt (const vec4 b= gl_Secondary;)
+-Not showing the value. Not sure how I would even do that for the pre-defined variables.

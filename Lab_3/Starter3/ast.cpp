@@ -171,6 +171,7 @@ std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
         Symbol existing_symbol = m_symbolTable.getElementInStack(m_ID);
         os << semanticErrorHeader()
            << "In declaration: " << Symbol(m_isConst, m_ID, m_typeNode->type())
+                                 << (m_expression? " = " : "") << m_expression
            << std::endl << "'" << m_ID << "'" << " already declared in this scope: "
            << existing_symbol;
     }
@@ -179,11 +180,22 @@ std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
         Symbol special = m_symbolTable.getSpecial(m_ID);
         os << semanticErrorHeader()
            << "In declaration: " << Symbol(m_isConst, m_ID, m_typeNode->type())
+                                 << (m_expression? " = " : "") << m_expression
            << std::endl << "'" << m_ID << "' is a pre-defined variable '" << special << "' and cannot be shadowed";
     }
     else m_symbolTable.pushElement(Symbol(m_isConst, m_ID, m_typeNode->type()));
 
-    if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
+    if (m_expression) {
+        m_expression->populateSymbolTableAndCheckErrors(os);
+        if (m_isConst && !m_expression->isConstExpr()) {
+            foundSemanticError();
+            os << semanticErrorHeader()
+               << "In declaration: " << Symbol(m_isConst, m_ID, m_typeNode->type())
+                                     << (m_expression? " = " : "") << m_expression
+               << std::endl << "Expression '" << m_expression
+               << "' is not const-expression, for initialization of const-qualified variable";
+        }
+    }
     return os;
 }
 
@@ -318,20 +330,16 @@ void HasType::setType(int _type, int vec_size) {
 
 
 // Expression--------------------------------------
-Expression::Expression(bool is_constexpr)
-        :HasType(), m_isConstExpr(is_constexpr) {}
-
-
 std::map<int, std::string> OperationExpression::m_op_to_string {
         {AND, "&&"}, {OR, "||"}, {EQ, "=="}, {NEQ, "!="}, {LEQ, "<="}, {GEQ, ">="},
         {'<', "<"}, {'>', ">"}, {'+', "+"}, {'-', "-"}, {'*', "*"}, {'/', "/"}, {'^', "^"},
         {UMINUS, "-"}, {'!', "!"}};
 
 OperationExpression::OperationExpression(int _op, Expression *rhs)
-        :Expression(rhs->isConstExpr()), m_lhs(nullptr), m_rhs(rhs), m_operator(_op) {}
+        :m_lhs(nullptr), m_rhs(rhs), m_operator(_op) {}
 
 OperationExpression::OperationExpression(Expression *lhs, int _op, Expression *rhs)
-        :Expression(lhs->isConstExpr() && rhs->isConstExpr()), m_lhs(lhs), m_rhs(rhs), m_operator(_op) {}
+        :m_lhs(lhs), m_rhs(rhs), m_operator(_op) {}
 
 OperationExpression::~OperationExpression() {
     delete m_lhs;
@@ -345,6 +353,8 @@ std::ostream& OperationExpression::write(std::ostream &os) const {
 std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) {
     if (m_lhs) m_lhs->populateTypeAndCheckErrors(os);
     if (m_rhs) m_rhs->populateTypeAndCheckErrors(os);
+
+    m_isConstExpr = (m_lhs? m_lhs->isConstExpr() : true) && m_rhs->isConstExpr();
 
     if (m_lhs && m_rhs) { //Binary operation
         if (!operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
@@ -376,13 +386,13 @@ std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) 
 
 
 LiteralExpression::LiteralExpression(bool val)
-        :Expression(true), m_valBool(val), m_isBool(true), m_isInt(false), m_isFloat(false) {}
+        :m_valBool(val), m_isBool(true), m_isInt(false), m_isFloat(false) {}
 
 LiteralExpression::LiteralExpression(int val)
-        :Expression(true), m_valInt(val), m_isBool(false), m_isInt(true), m_isFloat(false) {}
+        :m_valInt(val), m_isBool(false), m_isInt(true), m_isFloat(false) {}
 
 LiteralExpression::LiteralExpression(float val)
-        :Expression(true), m_valFloat(val), m_isBool(false), m_isInt(false), m_isFloat(true) {}
+        :m_valFloat(val), m_isBool(false), m_isInt(false), m_isFloat(true) {}
 
 std::ostream& LiteralExpression::write(std::ostream& os) const {
     if (m_isBool)
@@ -400,6 +410,7 @@ std::ostream& LiteralExpression::populateTypeAndCheckErrors(std::ostream &os) {
         setType(INT_T);
     else if (m_isFloat)
         setType(FLOAT_T);
+    m_isConstExpr = true;
     return os;
 }
 
@@ -407,19 +418,19 @@ std::ostream& LiteralExpression::populateTypeAndCheckErrors(std::ostream &os) {
 std::map<int, std::string> OtherExpression::m_func_to_string{{DP3, "dp3"}, {LIT, "lit"}, {RSQ, "rsq"}};
 
 OtherExpression::OtherExpression(Expression* expression)
-        :Expression(expression->isConstExpr()), m_expression(expression),
+        :m_expression(expression),
          m_variable(nullptr), m_arguments(nullptr), m_typeNode(nullptr), m_func(-1) {}
 
 OtherExpression::OtherExpression(Variable* variable)
-        :Expression(false), m_variable(variable),
+        :m_variable(variable),
          m_expression(nullptr), m_arguments(nullptr), m_typeNode(nullptr), m_func(-1) {}
 
 OtherExpression::OtherExpression(TypeNode* _type, Arguments* arguments)
-        :Expression(false), m_typeNode(_type), m_arguments(arguments),
+        :m_typeNode(_type), m_arguments(arguments),
          m_expression(nullptr), m_variable(nullptr), m_func(-1) {}
 
 OtherExpression::OtherExpression(int func, Arguments* arguments)
-        :Expression(false), m_func(func), m_arguments(arguments),
+        :m_func(func), m_arguments(arguments),
          m_expression(nullptr), m_variable(nullptr), m_typeNode(nullptr) {}
 
 OtherExpression::~OtherExpression() {
@@ -441,7 +452,10 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
 }
 
 std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
-    if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
+    if (m_expression) {
+        m_expression->populateSymbolTableAndCheckErrors(os);
+        m_isConstExpr = m_expression->isConstExpr();
+    }
     if (m_variable) {
         m_variable->populateSymbolTableAndCheckErrors(os);
         if (m_symbolTable.findSpecial(m_variable->id()) &&
@@ -452,6 +466,7 @@ std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &o
                << "In variable: " << m_variable
                << std::endl << "Pre-defined variable '" << special_symbol << "' is of class 'result' and cannot be read";
         }
+        m_isConstExpr = m_variable->isConstExpr();
     }
     if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
     return os;
@@ -545,6 +560,10 @@ std::ostream& Variable::write(std::ostream &os) const {
 	if(m_isIndexPresent) os << "(INDEX " << type() << " ";
 	os << m_ID << (m_isIndexPresent? (" " + std::to_string(m_index) + ")") : "");
     return os;
+}
+
+bool Variable::isConstExpr() const {
+    return m_symbolTable.getElementInStack(m_ID).isConst();
 }
 
 std::ostream& Variable::populateSymbolTableAndCheckErrors(std::ostream &os) {

@@ -7,6 +7,7 @@ Populates the SymbolTable and check for a number of errors. If there are multipl
 -Variable declared before it is used
 -const qualified variables not used in left-hand-side of assignment statement
 -correct use of Pre-Defiend Variables
+-Initialization of const-qualifies variables with const-expression only
 
 
 populateTypeAndCheckErrors----------------------------------
