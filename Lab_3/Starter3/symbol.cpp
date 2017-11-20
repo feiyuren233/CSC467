@@ -73,7 +73,7 @@ bool SymbolTable::findElementInStack(const std::string& _ID) {
         if (id_scope->second.find(_ID) != id_scope->second.end())
             return true;
     }
-    return false;
+    return (m_preDefinedSpecials.find(_ID) != m_preDefinedSpecials.end());
 }
 
 bool SymbolTable::findElementInCurrentScope(const std::string &_ID) {
@@ -89,6 +89,8 @@ Symbol SymbolTable::getElementInStack(const std::string &_ID) {
         if (id_scope->second.find(_ID) != id_scope->second.end())
             return id_scope->second.at(_ID);
     }
+    if (m_preDefinedSpecials.find(_ID) != m_preDefinedSpecials.end())
+        return m_preDefinedSpecials.find(_ID)->second;
     throw std::runtime_error("SymbolTable::getElement: Symbol " + _ID + " not found in symbol table");
 }
 
@@ -102,21 +104,21 @@ Symbol SymbolTable::getSpecial(const std::string &_ID) {
 
 
 SymbolScope SymbolTable::m_preDefinedSpecials {
-        {"gl_FragColor", Symbol(false, "gl_FragColor", Type(VEC_T, 4))},
-        {"gl_FragDepth", Symbol(false, "gl_FragDepth", Type(BOOL_T))},
-        {"gl_FragCoord", Symbol(false, "gl_FragCoord", Type(VEC_T, 4))},
+        {"gl_FragColor", Symbol(false, "gl_FragColor", Type(VEC_T, 4), Symbol::RESULT)},
+        {"gl_FragDepth", Symbol(false, "gl_FragDepth", Type(BOOL_T), Symbol::RESULT)},
+        {"gl_FragCoord", Symbol(false, "gl_FragCoord", Type(VEC_T, 4), Symbol::RESULT)},
 
-        {"gl_TextCoord", Symbol(true, "gl_TextCoord", Type(VEC_T, 4))},
-        {"gl_Color", Symbol(true, "gl_Color", Type(VEC_T, 4))},
-        {"gl_Secondary", Symbol(true, "gl_Secondary", Type(VEC_T, 4))},
-        {"gl_FogFragCoord", Symbol(true, "gl_FogFragCoord", Type(VEC_T, 4))},
+        {"gl_TextCoord", Symbol(true, "gl_TextCoord", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
+        {"gl_Color", Symbol(true, "gl_Color", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
+        {"gl_Secondary", Symbol(true, "gl_Secondary", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
+        {"gl_FogFragCoord", Symbol(true, "gl_FogFragCoord", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
 
-        {"gl_Light_Half", Symbol(true, "gl_Light_Half", Type(VEC_T, 4))},
-        {"gl_Light_Ambient", Symbol(true, "gl_Light_Ambient", Type(VEC_T, 4))},
-        {"gl_Material_Shininess", Symbol(true, "gl_Material_Shininess", Type(VEC_T, 4))},
-        {"env1", Symbol(true, "env1", Type(VEC_T, 4))},
-        {"env2", Symbol(true, "env2", Type(VEC_T, 4))},
-        {"env3", Symbol(true, "env3", Type(VEC_T, 4))}
+        {"gl_Light_Half", Symbol(true, "gl_Light_Half", Type(VEC_T, 4), Symbol::UNIFORM)},
+        {"gl_Light_Ambient", Symbol(true, "gl_Light_Ambient", Type(VEC_T, 4), Symbol::UNIFORM)},
+        {"gl_Material_Shininess", Symbol(true, "gl_Material_Shininess", Type(VEC_T, 4), Symbol::UNIFORM)},
+        {"env1", Symbol(true, "env1", Type(VEC_T, 4), Symbol::UNIFORM)},
+        {"env2", Symbol(true, "env2", Type(VEC_T, 4), Symbol::UNIFORM)},
+        {"env3", Symbol(true, "env3", Type(VEC_T, 4), Symbol::UNIFORM)}
 };
 
 

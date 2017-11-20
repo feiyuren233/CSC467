@@ -1,9 +1,7 @@
 Initialization ------------------------- pg6 [2]
 I have set constExpr for literals, and propagated it. If a variable isConst, it's also a constExpr, so set this up. Then for initialization of const variables just check that expression is constExpr.
 -> f_initialization.txt
-
-Pre-Defined Variables ------------------ pg7
-Add components to SymbolTable to implement isPreDefinedResult, isPreDefinedAttribute, etc. Where there are checks for variables in scopes, etc. check these first. Or, add extra information to symbol to capture the behavior of 'result', 'attribute', etc. and push these into a scope ZERO. You may need to do both, actually. 
+-> f_pre-defined_variables.txt (const vec4 b= gl_Secondary;)
 
 Variables Bonus ------------------------ pg7 [1]
 Add a isAssigned element to Symbol, and set true if a variable is assigned in construction, or once an assignmenet statement is found. If that variable is used, check the isAssigned parameter and report error if it's not set.
@@ -12,3 +10,7 @@ Reporting Bonuses ---------------------- pg8
 -Line number (done)
 -column number
 -contextual messages
+
+Pre-Defined Variables ------------------ pg7
+-Done, except below
+-the "cannot be assigned anywhere in the scope of an if or else statement" is confusing

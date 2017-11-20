@@ -174,7 +174,16 @@ std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
            << std::endl << "'" << m_ID << "'" << " already declared in this scope: "
            << existing_symbol;
     }
+    else if (m_symbolTable.findSpecial(m_ID)) {
+        foundSemanticError();
+        Symbol special = m_symbolTable.getSpecial(m_ID);
+        os << semanticErrorHeader()
+           << "In declaration: " << Symbol(m_isConst, m_ID, m_typeNode->type())
+           << std::endl << "'" << m_ID << "' is a pre-defined variable '" << special << "' and cannot be shadowed";
+    }
     else m_symbolTable.pushElement(Symbol(m_isConst, m_ID, m_typeNode->type()));
+
+    if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
     return os;
 }
 
@@ -236,15 +245,22 @@ std::ostream& Statement::write(std::ostream &os) const {
 
 std::ostream& Statement::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_scope) m_scope->populateSymbolTableAndCheckErrors(os);
-    if (m_variable) {
+    if (m_variable) { //variable = expression
         m_variable->populateSymbolTableAndCheckErrors(os);
         if (m_symbolTable.findElementInStack(m_variable->id())) {
             Symbol symbol = m_symbolTable.getElementInStack(m_variable->id());
-            if (symbol.isConst()) {
+            if (symbol.isConst() ||
+                symbol.getSpecialDesignation() == Symbol::ATTRIBUTE ||
+                symbol.getSpecialDesignation() == Symbol::UNIFORM) {
                 foundSemanticError();
                 os << semanticErrorHeader()
-                   << "In assignment expression: " << m_variable << " = " << m_expression
-                   << std::endl << "Cannot assign const-qualified variable '" << symbol << "'";
+                   << "In assignment expression: " << m_variable << " = " << m_expression << std::endl;
+                    if (symbol.getSpecialDesignation() == Symbol::ATTRIBUTE ||
+                        symbol.getSpecialDesignation() == Symbol::UNIFORM) {
+                        os << "Cannot assign to pre-defined variable of class '"
+                           << ((symbol.getSpecialDesignation() == Symbol::ATTRIBUTE) ? "attribute" : "uniform") << "'";
+                    }
+                    else { os << "Cannot assign const-qualified variable '" << symbol << "'"; }
             }
         }
     }
@@ -330,7 +346,7 @@ std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) 
     if (m_lhs) m_lhs->populateTypeAndCheckErrors(os);
     if (m_rhs) m_rhs->populateTypeAndCheckErrors(os);
 
-    if (m_lhs && m_rhs) {
+    if (m_lhs && m_rhs) { //Binary operation
         if (!operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
             foundSemanticError();
             os << semanticErrorHeader()
@@ -346,7 +362,7 @@ std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) 
         setType(ANY_T);
         }
     }
-    else if (!validUnary(m_operator, m_rhs->type())) {
+    else if (!validUnary(m_operator, m_rhs->type())) { //Unary operation
         foundSemanticError();
         os << semanticErrorHeader()
            << "In unary expression: " << this
@@ -426,7 +442,17 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
 
 std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
     if (m_expression) m_expression->populateSymbolTableAndCheckErrors(os);
-    if (m_variable) m_variable->populateSymbolTableAndCheckErrors(os);
+    if (m_variable) {
+        m_variable->populateSymbolTableAndCheckErrors(os);
+        if (m_symbolTable.findSpecial(m_variable->id()) &&
+            m_symbolTable.getSpecial(m_variable->id()).getSpecialDesignation() == Symbol::RESULT) {
+            Symbol special_symbol = m_symbolTable.getSpecial(m_variable->id());
+            foundSemanticError();
+            os << semanticErrorHeader()
+               << "In variable: " << m_variable
+               << std::endl << "Pre-defined variable '" << special_symbol << "' is of class 'result' and cannot be read";
+        }
+    }
     if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
     return os;
 }
@@ -526,7 +552,7 @@ std::ostream& Variable::populateSymbolTableAndCheckErrors(std::ostream &os) {
         foundSemanticError();
         os << semanticErrorHeader()
            << "Variable '" << this << "' used before being defined";
-        //Push variable of
+        //Push variable of type ANY_T to allow error checking to continue
         m_symbolTable.pushElement(Symbol(false, m_ID, Type(ANY_T)));
     }
     return os;

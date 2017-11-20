@@ -6,6 +6,8 @@ Populates the SymbolTable and check for a number of errors. If there are multipl
 -Variable only declared once per scope
 -Variable declared before it is used
 -const qualified variables not used in left-hand-side of assignment statement
+-correct use of Pre-Defiend Variables
+
 
 populateTypeAndCheckErrors----------------------------------
 Populates the type of HasType nodes bottom-up, and checks a number of errors (also buttom-up). If there is an error and a type can't be deduced for a HasType node, it will be set to ANY_T, so that
