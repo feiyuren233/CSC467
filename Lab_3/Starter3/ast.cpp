@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <exception>
+#include <sstream>
 
 #include "ast.hpp"
 #include "common.h"
@@ -731,5 +732,7 @@ void ast_free(Node *ast) {
 }
 
 void ast_print(Node * ast) {
-    std::cout << std::endl << std::endl << ast << std::endl;
+    std::stringstream os_ss;
+    os_ss << std::endl << std::endl << ast << std::endl;
+    fprintf(errorFile, os_ss.str().c_str());
 }
