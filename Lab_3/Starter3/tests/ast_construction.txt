@@ -28,7 +28,7 @@
 	/*statements*/
 
 	any = 12*2; any = any/2; any = (12-2); any = 12+int1; any = 2^2;
-	
+	float1 = rsq(any);
 
 	if(myBvec[1]) ;
 	else if(((bool1))){any = 5;}

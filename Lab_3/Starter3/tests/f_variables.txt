@@ -19,5 +19,4 @@
 		}
 	 if(c==3) error = true;
 	}
-	
 }

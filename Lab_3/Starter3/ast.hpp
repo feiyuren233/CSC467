@@ -171,7 +171,7 @@ class HasType : public Node
 public:
     HasType();
     virtual ~HasType() = default;
-    Type type() { return m_type; }
+    Type type() const { return m_type; }
 
 protected:
     void setType(Type type);

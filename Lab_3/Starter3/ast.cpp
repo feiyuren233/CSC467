@@ -75,9 +75,9 @@ Scope::~Scope() {
 
 std::ostream& Scope::write(std::ostream& os) const {
     enterScope(this);
-    os << std::endl << indent(0) << "SCOPE ("
-       << std::endl << indent(0) << "DECLARATIONS (" << m_declarations << ")"
-       << std::endl << indent(0) << "STATEMENTS (" << m_statements << ")";
+    os << std::endl << indent(0) << "(SCOPE"
+       << std::endl << indent(0) << "(DECLARATIONS" << m_declarations << ")"
+       << std::endl << indent(0) << "(STATEMENTS" << m_statements << ")";
     exitScope();
     return os;
 }
@@ -162,7 +162,7 @@ Declaration::~Declaration() {
 
 std::ostream& Declaration::write(std::ostream &os) const {
     return os << std::endl << indent(1)
-              << (m_isConst ? "const " : "") << m_typeNode << " " << m_ID << " " << m_expression;
+              << "(DECLARATION " << (m_isConst ? "const " : "") << m_typeNode << " " << m_ID << " " << m_expression << ")";
 }
 
 std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
@@ -220,10 +220,10 @@ std::ostream& Statement::write(std::ostream &os) const {
     else if (m_scope)
         return os << m_scope;
     else if (m_variable && m_expression) //variable = expression
-        return os << std::endl << indent(1) << m_variable << " = " << m_expression;
+        return os << std::endl << indent(1) << "(ASSIGN " <<m_variable << " " << m_expression << ")";
     else if (m_expression && m_statement) { //if statement
         enterIf();
-        os << std::endl << indent(0) << "IF ( " << m_expression << " )"
+        os << std::endl << indent(0) << "IF (" << m_expression << " )"
            << m_statement;
         if (m_elseStatement) {
             os << std::endl << indent(0) << "ELSE"
@@ -323,7 +323,7 @@ OperationExpression::~OperationExpression() {
 }
 
 std::ostream& OperationExpression::write(std::ostream &os) const {
-    return os << m_lhs << (m_lhs? " " : "") << m_op_to_string[m_operator] << (m_lhs? " " : "") << m_rhs;
+    return os << (m_lhs? "(BINARY " : "(UNARY ") << m_rhs->type() << " " << m_op_to_string[m_operator] << " " << m_lhs << (m_lhs? " " : "") << m_rhs << ")";
 }
 
 std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) {
@@ -413,9 +413,9 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
     else if (m_variable)
         return os << m_variable;
     else if (m_typeNode)
-        return os << m_typeNode << " ( " << m_arguments << " ) ";
+        return os << "(CALL " << m_typeNode << " " << m_arguments << ")";
     else
-        return os << m_func_to_string[m_func] << " ( " << m_arguments << " ) ";
+        return os << "(CALL " << m_func_to_string[m_func] << " " << m_arguments << ")";
 }
 
 std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
@@ -430,7 +430,7 @@ std::ostream& OtherExpression::populateTypeAndCheckErrors(std::ostream &os) {
     if (m_variable) m_variable->populateTypeAndCheckErrors(os);
     if (m_arguments) m_arguments->populateTypeAndCheckErrors(os);
 
-    if (m_arguments) //function-like operators
+    if (m_arguments) //3-like operators
     {
         if (m_typeNode) { //type ( arguments_opt )
             if ((m_typeNode->type().baseType() != ANY_T) && (m_arguments->type().baseType() != ANY_T)) {
@@ -510,7 +510,9 @@ Variable::Variable(const std::string& _ID, int index)
         :m_ID(_ID), m_index(index), m_isIndexPresent(true) {}
 
 std::ostream& Variable::write(std::ostream &os) const {
-    return os << m_ID << (m_isIndexPresent? ("[" + std::to_string(m_index) + "]") : "");
+	if(m_isIndexPresent) os << "(INDEX " << type() << " ";
+	os << m_ID << (m_isIndexPresent? (" " + std::to_string(m_index) + ")") : "");
+    return os;
 }
 
 std::ostream& Variable::populateSymbolTableAndCheckErrors(std::ostream &os) {
