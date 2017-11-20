@@ -332,11 +332,17 @@ std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) 
 
     if (m_lhs && m_rhs) {
         if (!operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
-        foundSemanticError();
-        os << semanticErrorHeader()
-           << "In expression: " << this
-           << std::endl << "Type of right-hand-side operand '" << m_rhs->type()
-           << "' does not match left-hand-side operand of type '" << m_lhs->type() << "'";
+            foundSemanticError();
+            os << semanticErrorHeader()
+               << "In expression: " << this << std::endl;
+            if (equalBulInvalidTypesForOp(m_lhs->type(), m_operator, m_rhs->type())) {
+                if ((m_operator == EQ || m_operator == NEQ) && m_lhs->type().baseType() == BOOL_T)
+                    os << "Comparison of 'bool' types is not allowed (see lab3 handout)";
+                else os << "Operator '" << m_op_to_string[m_operator] << "' cannot take operands of type '" << m_lhs->type() << "'";
+            } else {
+                os << "Type of right-hand-side operand '" << m_rhs->type()
+                   << "' does not match left-hand-side operand of type '" << m_lhs->type() << "'";
+            }
         setType(ANY_T);
         }
     }
@@ -535,7 +541,11 @@ std::ostream& Variable::populateTypeAndCheckErrors(std::ostream &os) {
            << std::endl << "Access is out of bounds of the variable type '" << symbol.type() << "'";
         setType(ANY_T);
     }
-    else setType(symbol.type());
+    else {
+        if (m_isIndexPresent)
+            setType(symbol.type().baseType());
+        else setType(symbol.type());
+    }
     return os;
 }
 
@@ -595,7 +605,7 @@ bool exactEqual(Type a, Type b) {
         return true;
     else return (a.enumGivenType() == b.enumGivenType() &&
                  a.baseType() == b.baseType() &&
-                 a.vecSize() == a.vecSize());
+                 a.vecSize() == b.vecSize());
 }
 
 bool validUnary(int op, Type a) {
@@ -648,13 +658,11 @@ bool operationEqual(Type a, int op, Type b) {
     throw std::runtime_error("Unknown operator: " + std::to_string(op));
 }
 
-bool constructorEqual(Type var, Type args, int numExpressions)
-{
-
+bool equalBulInvalidTypesForOp(Type a, int op, Type b) {
+    return !operationEqual(a, op, b) && exactEqual(a, b);
 }
 
-bool isArithmetic(int type)
-{
+bool isArithmetic(int type) {
     return type == INT_T || type == FLOAT_T;
 }
 
