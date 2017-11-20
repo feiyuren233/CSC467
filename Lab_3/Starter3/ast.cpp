@@ -77,7 +77,7 @@ std::ostream& Scope::write(std::ostream& os) const {
     enterScope(this);
     os << std::endl << indent(0) << "(SCOPE"
        << std::endl << indent(0) << "(DECLARATIONS" << m_declarations << ")"
-       << std::endl << indent(0) << "(STATEMENTS" << m_statements << ")";
+       << std::endl << indent(0) << "(STATEMENTS" << m_statements << "))";
     exitScope();
     return os;
 }
@@ -162,7 +162,7 @@ Declaration::~Declaration() {
 
 std::ostream& Declaration::write(std::ostream &os) const {
     return os << std::endl << indent(1)
-              << "(DECLARATION " << (m_isConst ? "const " : "") << m_typeNode << " " << m_ID << " " << m_expression << ")";
+              << "(DECLARATION " << m_ID << (m_isConst ? " const " : " ") << m_typeNode << " " << m_expression << ")";
 }
 
 std::ostream& Declaration::populateSymbolTableAndCheckErrors(std::ostream &os) {
@@ -223,12 +223,12 @@ std::ostream& Statement::write(std::ostream &os) const {
         return os << std::endl << indent(1) << "(ASSIGN " <<m_variable << " " << m_expression << ")";
     else if (m_expression && m_statement) { //if statement
         enterIf();
-        os << std::endl << indent(0) << "IF (" << m_expression << " )"
-           << m_statement;
+        os << std::endl << indent(0) << "(IF" << m_expression << " " << m_statement;
         if (m_elseStatement) {
             os << std::endl << indent(0) << "ELSE"
                << m_elseStatement;
         }
+		os << ")";
         exitIf();
         return os;
     } else throw std::runtime_error("Statement::write: No correct sub-type of Statement found");
