@@ -223,7 +223,7 @@ std::ostream& Statement::write(std::ostream &os) const {
         return os << std::endl << indent(1) << "(ASSIGN " <<m_variable << " " << m_expression << ")";
     else if (m_expression && m_statement) { //if statement
         enterIf();
-        os << std::endl << indent(0) << "(IF" << m_expression << " " << m_statement;
+        os << std::endl << indent(0) << "(IF " << m_expression << " " << m_statement;
         if (m_elseStatement) {
             os << std::endl << indent(0) << "ELSE"
                << m_elseStatement;
@@ -415,7 +415,7 @@ OtherExpression::~OtherExpression() {
 
 std::ostream& OtherExpression::write(std::ostream &os) const {
     if (m_expression)
-        return os << "( " << m_expression << " )";
+        return os << " " << m_expression;
     else if (m_variable)
         return os << m_variable;
     else if (m_typeNode)
