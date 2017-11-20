@@ -272,7 +272,7 @@ std::ostream& Statement::populateSymbolTableAndCheckErrors(std::ostream &os) {
                         os << "Cannot assign to pre-defined variable of class '"
                            << ((symbol.getSpecialDesignation() == Symbol::ATTRIBUTE) ? "attribute" : "uniform") << "'";
                     }
-                    else { os << "Cannot assign const-qualified variable '" << symbol << "'"; }
+                    else { os << "Cannot assign to const-qualified variable '" << symbol << "'"; }
             }
         }
     }
@@ -350,11 +350,17 @@ std::ostream& OperationExpression::write(std::ostream &os) const {
     return os << (m_lhs? "(BINARY " : "(UNARY ") << m_rhs->type() << " " << m_op_to_string[m_operator] << " " << m_lhs << (m_lhs? " " : "") << m_rhs << ")";
 }
 
+std::ostream& OperationExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    if (m_lhs) m_lhs->populateSymbolTableAndCheckErrors(os);
+    if (m_rhs) m_rhs->populateSymbolTableAndCheckErrors(os);
+    m_isConstExpr = (m_lhs? m_lhs->isConstExpr() : true) && m_rhs->isConstExpr();
+
+    return os;
+}
+
 std::ostream& OperationExpression::populateTypeAndCheckErrors(std::ostream &os) {
     if (m_lhs) m_lhs->populateTypeAndCheckErrors(os);
     if (m_rhs) m_rhs->populateTypeAndCheckErrors(os);
-
-    m_isConstExpr = (m_lhs? m_lhs->isConstExpr() : true) && m_rhs->isConstExpr();
 
     if (m_lhs && m_rhs) { //Binary operation
         if (!operationEqual(m_lhs->type(), m_operator, m_rhs->type())) {
@@ -403,6 +409,11 @@ std::ostream& LiteralExpression::write(std::ostream& os) const {
         return os << m_valFloat;
 }
 
+std::ostream& LiteralExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
+    m_isConstExpr = true;
+    return os;
+}
+
 std::ostream& LiteralExpression::populateTypeAndCheckErrors(std::ostream &os) {
     if (m_isBool)
         setType(BOOL_T);
@@ -410,7 +421,6 @@ std::ostream& LiteralExpression::populateTypeAndCheckErrors(std::ostream &os) {
         setType(INT_T);
     else if (m_isFloat)
         setType(FLOAT_T);
-    m_isConstExpr = true;
     return os;
 }
 
@@ -633,7 +643,7 @@ std::ostream& Arguments::populateTypeAndCheckErrors(std::ostream &os) {
             foundSemanticError();
             os << semanticErrorHeader()
                << "In arguments: " << m_arguments << ", " << m_expression
-               << "Argument types '" << m_arguments->type() << "' and '" << m_expression->type() << "' don't match";
+               << std::endl << "Argument types '" << m_arguments->type() << "' and '" << m_expression->type() << "' don't match";
             setType(ANY_T);
         } else setType(m_expression->type());
     }

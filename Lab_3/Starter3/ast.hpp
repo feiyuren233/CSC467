@@ -200,6 +200,7 @@ public:
     virtual ~OperationExpression();
     virtual std::ostream& write(std::ostream& os) const;
 
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
@@ -218,6 +219,7 @@ public:
     explicit LiteralExpression(float val);
     virtual std::ostream& write(std::ostream& os) const;
 
+    virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
 private:
