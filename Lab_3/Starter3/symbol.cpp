@@ -38,10 +38,10 @@ std::ostream& Type::write(std::ostream &os) const {
 }
 
 Symbol::Symbol()
-        :m_isConst(false), m_type(ANY_T) {}
+        :m_isConst(false), m_type(ANY_T), m_specialDesignation(NORMAL) {}
 
-Symbol::Symbol(bool _isConst, const std::string &_id, Type _type)
-        :m_isConst(_isConst), m_ID(_id), m_type(_type) {}
+Symbol::Symbol(bool _isConst, const std::string &_id, Type _type, specialDes special)
+        :m_isConst(_isConst), m_ID(_id), m_type(_type), m_specialDesignation(special) {}
 
 std::ostream& Symbol::write(std::ostream &os) const {
     return os << (m_isConst ? "const " : "") << m_type << " " << m_ID;
@@ -91,6 +91,33 @@ Symbol SymbolTable::getElementInStack(const std::string &_ID) {
     }
     throw std::runtime_error("SymbolTable::getElement: Symbol " + _ID + " not found in symbol table");
 }
+
+bool SymbolTable::findSpecial(const std::string &_ID) {
+    return m_preDefinedSpecials.find(_ID) != m_preDefinedSpecials.end();
+}
+
+Symbol SymbolTable::getSpecial(const std::string &_ID) {
+    return m_preDefinedSpecials[_ID];
+}
+
+
+SymbolScope SymbolTable::m_preDefinedSpecials {
+        {"gl_FragColor", Symbol(false, "gl_FragColor", Type(VEC_T, 4))},
+        {"gl_FragDepth", Symbol(false, "gl_FragDepth", Type(BOOL_T))},
+        {"gl_FragCoord", Symbol(false, "gl_FragCoord", Type(VEC_T, 4))},
+
+        {"gl_TextCoord", Symbol(true, "gl_TextCoord", Type(VEC_T, 4))},
+        {"gl_Color", Symbol(true, "gl_Color", Type(VEC_T, 4))},
+        {"gl_Secondary", Symbol(true, "gl_Secondary", Type(VEC_T, 4))},
+        {"gl_FogFragCoord", Symbol(true, "gl_FogFragCoord", Type(VEC_T, 4))},
+
+        {"gl_Light_Half", Symbol(true, "gl_Light_Half", Type(VEC_T, 4))},
+        {"gl_Light_Ambient", Symbol(true, "gl_Light_Ambient", Type(VEC_T, 4))},
+        {"gl_Material_Shininess", Symbol(true, "gl_Material_Shininess", Type(VEC_T, 4))},
+        {"env1", Symbol(true, "env1", Type(VEC_T, 4))},
+        {"env2", Symbol(true, "env2", Type(VEC_T, 4))},
+        {"env3", Symbol(true, "env3", Type(VEC_T, 4))}
+};
 
 
 std::ostream& operator<<(std::ostream& os, const Type type) {
