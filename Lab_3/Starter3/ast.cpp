@@ -702,5 +702,5 @@ void ast_free(Node *ast) {
 }
 
 void ast_print(Node * ast) {
-    std::cout << ast << std::endl;
+    std::cout << std::endl << std::endl << ast << std::endl;
 }

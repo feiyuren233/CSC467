@@ -89,8 +89,14 @@ int main (int argc, char *argv[]) {
     return 0; // parse failed
   }
 
-    //Call semantic_check here before code generation, it's easier than in parser.y, and also neater after dumping AST
-    errorOccurred = (semantic_check(ast) == 1)? 1 : errorOccurred;
+//Call semantic_check here before code generation, it's easier than in parser.y
+  errorOccurred = (semantic_check(ast) == 1)? 1 : errorOccurred;
+
+/* Phase 3: Call the AST dumping routine if requested */
+  if (dumpAST) {
+    ast_print(ast);
+  }
+
 
 /* Phase 4: Add code to call the code generation routine */
 /* TODO: call your code generation routine here */
@@ -99,11 +105,6 @@ int main (int argc, char *argv[]) {
   else 
    // genCode(ast);
     ;
-
-/* Phase 3: Call the AST dumping routine if requested */
-  if (dumpAST) {
-      ast_print(ast);
-  }
 
 
 /***********************************************************************
