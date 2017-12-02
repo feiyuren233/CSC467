@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 #include "symbol.hpp"
-#include "arb_instructions.hpp"
+#include "arb.hpp"
 
 // Dummy node just so everything compiles, create your own node/nodes
 //

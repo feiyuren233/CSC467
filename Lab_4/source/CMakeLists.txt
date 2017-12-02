@@ -11,7 +11,7 @@ BISON_TARGET(BisonParser ${CMAKE_SOURCE_DIR}/parser.y ${CMAKE_SOURCE_DIR}/parser
 FLEX_TARGET(FlexScanner ${CMAKE_SOURCE_DIR}/scanner.l ${CMAKE_SOURCE_DIR}/scanner.c)
 ADD_FLEX_BISON_DEPENDENCY(FlexScanner BisonParser)
 
-set(SOURCE_FILES compiler467.c globalvars.c ast.cpp semantic.cpp symbol.cpp codegen.cpp arb_instructions.cpp arb_instructions.hpp)
+set(SOURCE_FILES compiler467.c globalvars.c ast.cpp semantic.cpp symbol.cpp codegen.cpp arb.cpp arb.hpp)
 
 add_executable(compiler467 ${SOURCE_FILES} 
 			   ${BISON_BisonParser_OUTPUTS} ${FLEX_FlexScanner_OUTPUTS})

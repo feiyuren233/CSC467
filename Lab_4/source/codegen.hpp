@@ -7,7 +7,7 @@
 
 #include "ast.hpp"
 #include "symbol.hpp"
-#include "arb_instructions.hpp"
+#include "arb.hpp"
 
 int genCode(Node* ast);
 
