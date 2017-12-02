@@ -1,3 +1,5 @@
+//NOTE: The original Demo files and *.o util files are 32-bit. To run on 64-bit systems install 'libc6:i386' and the 32-bit versions of the dependencies - by libxi-dev:i386, etc.
+
 freeglut3-dev
 libxi-dev
 libxmu-dev
