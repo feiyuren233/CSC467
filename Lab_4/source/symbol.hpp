@@ -48,11 +48,16 @@ public:
 
     std::ostream& write(std::ostream& os) const;
 
+    void setUniqueID(const std::string& unique_id) { m_uniqueID = unique_id; }
+    std::string uniqueID() { return m_uniqueID; }
+
 private:
     bool m_isConst;
     std::string m_ID;
     Type m_type;
     specialDes m_specialDesignation;
+
+    std::string m_uniqueID;
 };
 
 class Scope;

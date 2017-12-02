@@ -4,6 +4,9 @@
 
 #include "symbol.hpp"
 //This is here because otherwise we get 'Node does not name a type' issue since 'parser.h' doesn't include 'ast.hpp'
+#include <string>
+#include <sstream>
+
 #include "ast.hpp"
 #include "parser.h"
 
@@ -81,6 +84,9 @@ bool SymbolTable::findElementInCurrentScope(const std::string &_ID) {
 }
 
 void SymbolTable::pushElement(Symbol element) {
+    std::stringstream address;
+    address << static_cast<const void*>(m_currentScopeID);
+    element.setUniqueID("unique_" + address.str() + "_" + element.id());
     currentScope()[element.id()] = element;
 }
 
