@@ -1,0 +1,10 @@
+freeglut3-dev
+libxi-dev
+libxmu-dev
+
+//Not sure about these
+mesa-utils
+mesa-common-dev
+
+binutils-gold
+libglew-dev
