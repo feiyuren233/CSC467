@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include "symbol.hpp"
+#include "arb_instructions.hpp"
 
 // Dummy node just so everything compiles, create your own node/nodes
 //
@@ -42,6 +43,8 @@ public:
     bool semanticallyCorrect() { return !m_semanticErrorFound; }
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os) { return os; }
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os) { return os; }
+
+    virtual ARBInstructionSequence genCode() { return ARBInstructionSequence(); }
 
 protected:
     void enterScope(const Scope* scope = nullptr) const;

@@ -26,7 +26,7 @@
 /* Phases 3,4: Uncomment following includes as needed */
 #include "ast.hpp"
 #include "semantic.hpp"
-//#include "codegen.h"
+#include "codegen.hpp"
 
 /***********************************************************************
  * Default values for various files. Note assumption that default files
@@ -103,7 +103,7 @@ int main (int argc, char *argv[]) {
   if (errorOccurred)
     fprintf(outputFile,"\n\nFailed to compile\n");
   else 
-   // genCode(ast);
+    genCode(ast);
     ;
 
 
