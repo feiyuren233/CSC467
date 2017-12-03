@@ -12,9 +12,11 @@
 class ARBVar
 {
 public:
-    ARBVar(int index = -1); //Temp variable
+    ARBVar();
     ARBVar(float val); //Literal
     ARBVar(std::string declared_name, int index = -1); //Declared variable
+
+    static ARBVar makeTemp(int index = -1); //Temp variable
 
     std::string id() { return m_ID; }
     bool empty() { return m_ID.empty(); }

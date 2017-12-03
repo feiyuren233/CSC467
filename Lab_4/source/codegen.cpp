@@ -73,7 +73,7 @@ ARBInstructionSequence Declaration::genCode() {
             ARBInstID::TEMP,
             declared_var,
             ARBVars(),
-            "variable declaration"
+            "DECLARATION"
     ));
 
     if (!expression_result_seq.empty())
@@ -81,7 +81,7 @@ ARBInstructionSequence Declaration::genCode() {
                 ARBInstID::MOV,
                 declared_var,
                 ARBVars{expression_result_seq.resultVar()},
-                "moving expression value to declared variable"
+                "CONSTRUCTION"
         ));
 
     return sequence;
@@ -94,11 +94,21 @@ ARBInstructionSequence Statement::genCode() {
         return m_scope->genCode();
     else if (m_variable && m_expression) { //variable = expression
         ARBInstructionSequence sequence = m_expression->genCode();
-        ARBVar variable = IDToARBVar(m_variable->id());
+        ARBVar variable = IDToARBVar(m_variable->id(), m_variable->hasIndex()? m_variable->index() : -1);
 
-        if (!sequence.instructions().empty())
+        if (!sequence.instructions().empty()) {
             sequence.instructions().back().changeResultVar(variable);
-        sequence.setResultVar(variable);
+            sequence.setResultVar(variable);
+        }
+        else {
+            sequence.push(ARBInstruction(
+                    ARBInstID::MOV,
+                    variable,
+                    ARBVars{sequence.resultVar()},
+                    "ASSIGNMENT"
+            ));
+            sequence.setResultVar(variable);
+        }
         return sequence;
     }
     else if (m_expression && m_statement) { //if statement
@@ -110,7 +120,7 @@ ARBInstructionSequence Statement::genCode() {
 
         sequence.push(expression_sequence);
 
-        ARBVar temp;
+        ARBVar temp = ARBVar::makeTemp();
         for (auto instruction : if_sequence.instructions()) {
             ARBVar result = instruction.changeResultVar(temp);
             sequence.push(instruction);
@@ -118,7 +128,7 @@ ARBInstructionSequence Statement::genCode() {
                     ARBInstID::CMP,
                     result,
                     ARBVars{condition, result, temp},
-                    "if statement correction on condition"
+                    "IF"
             ));
         }
 
@@ -129,7 +139,7 @@ ARBInstructionSequence Statement::genCode() {
                     ARBInstID::CMP,
                     result,
                     ARBVars{condition, temp, result},
-                    "else statement correction on condition"
+                    "ELSE"
             ));
         };
 
@@ -144,7 +154,7 @@ ARBInstructionSequence OperationExpression::genCode() {
     sequence.push(lhs_expression_sequence);
     sequence.push(rhs_expression_sequence);
 
-    ARBVar result;
+    ARBVar result = ARBVar::makeTemp();
     sequence.setResultVar(result);
 
     if (m_lhs && m_rhs) { //Binary operation
@@ -153,7 +163,7 @@ ARBInstructionSequence OperationExpression::genCode() {
                 ARBInstID::MUL,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "Binary expression"
+                "EXPRESSION (binary)"
         ));
     } else { //Unary operation
         //TODO: implement!
@@ -161,7 +171,7 @@ ARBInstructionSequence OperationExpression::genCode() {
                 ARBInstID::MUL,
                 result,
                 ARBVars{rhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "Unary expression"
+                "EXPRESSION (unary)"
         ));
     }
 
@@ -171,14 +181,14 @@ ARBInstructionSequence OperationExpression::genCode() {
 ARBInstructionSequence LiteralExpression::genCode() {
     ARBInstructionSequence sequence;
 
-    ARBVar result;
+    ARBVar result = ARBVar::makeTemp();
     sequence.setResultVar(result);
 
     sequence.push(ARBInstruction(
             ARBInstID::MOV,
             result,
             ARBVars{ARBVar(m_valFloat)},
-            "Literal definition"
+            "LITERAL"
     ));
     return sequence;
 }

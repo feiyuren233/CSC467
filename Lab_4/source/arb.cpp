@@ -22,9 +22,8 @@ const std::map<std::string, std::string> ARBVar::m_preDefinedID_to_ARBID {
         {"env3", "program.env[3]"}
 };
 
-ARBVar::ARBVar(int index)
-        :m_ID("tempVar" + std::to_string(m_uniqueIDCount++)), m_isLiteral(false),
-         m_isTemp(true), m_tempID(m_uniqueIDCount) {}
+ARBVar::ARBVar()
+        :m_ID(), m_isLiteral(false), m_isTemp(false), m_tempID(-1) {}
 
 ARBVar::ARBVar(float val)
         :m_ID(std::to_string(val)), m_isLiteral(true),
@@ -43,6 +42,15 @@ ARBVar::ARBVar(std::string declared_name, int index)
         std::vector<std::string> index_to_element{"x", "y", "z", "w"};
         m_ID += ("." + index_to_element[index]);
     }
+}
+
+ARBVar ARBVar::makeTemp(int index)
+{
+    ARBVar temp;
+    temp.m_ID = "tempVar" + std::to_string(m_uniqueIDCount++);
+    temp.m_isTemp = true;
+    temp.m_tempID = m_uniqueIDCount;
+    return temp;
 }
 
 
