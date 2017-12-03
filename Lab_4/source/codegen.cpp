@@ -7,6 +7,9 @@
 int genCode(Node* ast)
 {
     ARBInstructionSequence instr_sequence = ast->genCode();
+    //TODO: Implement printing to file
+    for (auto instruction : instr_sequence.instructions())
+        std::cout << instruction.to_string() << std::endl;
     return 1;
 }
 

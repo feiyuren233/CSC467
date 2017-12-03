@@ -48,10 +48,14 @@ public:
 
     ARBVar changeResultVar(ARBVar _new_result);
 
+    std::string to_string();
+
 private:
     ARBInstID m_ID;
     ARBVar m_resultVar;
     std::vector<ARBVar> m_argumentVars;
+
+    static const std::map<ARBInstID, std::string> m_ARBInstId_to_string;
 };
 typedef std::vector<ARBInstruction> ARBInstructions;
 

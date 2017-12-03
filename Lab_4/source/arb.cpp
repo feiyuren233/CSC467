@@ -38,12 +38,27 @@ ARBVar::ARBVar(std::string declared_name) :m_isLiteral(false)
 }
 
 
+const std::map<ARBInstID, std::string> ARBInstruction::m_ARBInstId_to_string {
+        {ARBInstID::ADD, "ADD"},
+        {ARBInstID::CMP, "CMP"},
+        {ARBInstID::MOV, "MOV"},
+        {ARBInstID::TEMP, "TEMP"}
+        //TODO: complete this map
+};
+
 ARBVar ARBInstruction::changeResultVar(ARBVar _new_result) {
     ARBVar temp = m_resultVar;
     m_resultVar = _new_result;
     return temp;
 }
 
+std::string ARBInstruction::to_string() {
+    std::string inst = m_ARBInstId_to_string.at(m_ID) + " " + m_resultVar.id();
+    for (auto var : m_argumentVars)
+        inst += (", " + var.id());
+    inst += ";";
+    return inst;
+}
 
 ARBInstructionSequence& ARBInstructionSequence::push(const ARBInstruction &instruction) {
     m_instructions.push_back(instruction);
