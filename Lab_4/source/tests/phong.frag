@@ -1,6 +1,6 @@
 {
-   vec4 fCol = gl_color;
-   vec4 fTex = gl_TexCoord;
+   vec4 fCol = gl_Color;
+   vec4 fTex = gl_TextCoord;
    vec4 eyeNorm;
    vec4 coeff;
    vec4 shade;
@@ -19,7 +19,6 @@
    shade = shade + coeff[1] * fCol;
    shade = shade + coeff[2] * fCol;
    gl_FragColor = shade;
-
 }
 
 
