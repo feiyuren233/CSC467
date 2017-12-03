@@ -474,7 +474,8 @@ std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &o
     }
     if (m_variable) {
         m_variable->populateSymbolTableAndCheckErrors(os);
-        if (m_symbolTable.findSpecial(m_variable->id()) &&
+        if (false && //In Lab3 handout it says 'result' are "write-only", but they're read in lab 4
+            m_symbolTable.findSpecial(m_variable->id()) &&
             m_symbolTable.getSpecial(m_variable->id()).getSpecialDesignation() == Symbol::RESULT) {
             Symbol special_symbol = m_symbolTable.getSpecial(m_variable->id());
             foundSemanticError();

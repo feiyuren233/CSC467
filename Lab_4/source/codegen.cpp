@@ -7,10 +7,36 @@
 int genCode(Node* ast)
 {
     ARBInstructionSequence instr_sequence = ast->genCode();
+    ARBInstructionSequence declaration_sequence = genTempVariableDeclarations(instr_sequence);
+
     //TODO: Implement printing to file
-    for (auto instruction : instr_sequence.instructions())
+    for (auto instruction : declaration_sequence.push(instr_sequence).instructions())
         std::cout << instruction.to_string() << std::endl;
     return 1;
+}
+
+ARBInstructionSequence genTempVariableDeclarations(ARBInstructionSequence& sequence)
+{
+    std::map<int, ARBVar> temp_vars;
+    for (auto instruction : sequence.instructions())
+    {
+        if (instruction.resultVar().isTemp())
+            temp_vars[instruction.resultVar().tempID()] = instruction.resultVar();
+
+        for (auto var : instruction.argVars()) {
+            if (var.isTemp())
+                temp_vars[var.tempID()] = var;
+        }
+    }
+
+    ARBInstructionSequence declaration_sequence;
+    for (auto var : temp_vars)
+        declaration_sequence.push(ARBInstruction(
+               ARBInstID::TEMP,
+               var.second,
+               ARBVars()
+        ));
+    return declaration_sequence;
 }
 
 ARBInstructionSequence concatenateCode(Node *a, Node *b)
@@ -67,16 +93,12 @@ ARBInstructionSequence Statement::genCode() {
     else if (m_scope)
         return m_scope->genCode();
     else if (m_variable && m_expression) { //variable = expression
-        ARBInstructionSequence sequence;
-        ARBInstructionSequence expression_sequence = m_expression->genCode();
+        ARBInstructionSequence sequence = m_expression->genCode();
+        ARBVar variable = IDToARBVar(m_variable->id());
 
-        sequence.push(expression_sequence);
-        sequence.push(ARBInstruction(
-                ARBInstID::MOV,
-                IDToARBVar(m_variable->id()),
-                ARBVars{expression_sequence.resultVar()},
-                "variable = expression"
-        ));
+        if (!sequence.instructions().empty())
+            sequence.instructions().back().changeResultVar(variable);
+        sequence.setResultVar(variable);
         return sequence;
     }
     else if (m_expression && m_statement) { //if statement
@@ -128,7 +150,7 @@ ARBInstructionSequence OperationExpression::genCode() {
     if (m_lhs && m_rhs) { //Binary operation
         //TODO: implement!
         sequence.push(ARBInstruction(
-                ARBInstID::ADD,
+                ARBInstID::MUL,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
                 "Binary expression"
@@ -136,7 +158,7 @@ ARBInstructionSequence OperationExpression::genCode() {
     } else { //Unary operation
         //TODO: implement!
         sequence.push(ARBInstruction(
-                ARBInstID::ADD,
+                ARBInstID::MUL,
                 result,
                 ARBVars{rhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
                 "Unary expression"

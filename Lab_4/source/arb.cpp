@@ -50,7 +50,8 @@ const std::map<ARBInstID, std::string> ARBInstruction::m_ARBInstId_to_string {
         {ARBInstID::ADD, "ADD"},
         {ARBInstID::CMP, "CMP"},
         {ARBInstID::MOV, "MOV"},
-        {ARBInstID::TEMP, "TEMP"}
+        {ARBInstID::TEMP, "TEMP"},
+        {ARBInstID::MUL, "MUL"}
         //TODO: complete this map
 };
 

@@ -11,6 +11,7 @@
 
 int genCode(Node* ast);
 
+ARBInstructionSequence genTempVariableDeclarations(ARBInstructionSequence& sequence);
 
 //AST genCode definitions --------------------------------------------------
 ARBInstructionSequence concatenateCode(Node* a, Node* b);
