@@ -177,7 +177,6 @@ ARBInstructionSequence OperationExpression::genCode() {
     sequence.setResultVar(result);
 
     if (m_lhs && m_rhs) { //Binary operation
-        //TODO: implement!
 		switch(m_operator){
 			case '+': sequence.push(ARBInstruction(
                 ARBInstID::ADD,
@@ -188,7 +187,7 @@ ARBInstructionSequence OperationExpression::genCode() {
                 ARBInstID::SUB,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary -)")); break;;
+                "EXPRESSION (binary -)")); break;
 			case '*': sequence.push(ARBInstruction(
                 ARBInstID::MUL,
                 result,
@@ -313,13 +312,24 @@ ARBInstructionSequence OperationExpression::genCode() {
 		
         
     } else { //Unary operation
-        //TODO: implement!
-        sequence.push(ARBInstruction(
-                ARBInstID::MUL,
+
+		switch(m_operator){
+			case '-': sequence.push(ARBInstruction(
+                ARBInstID::SUB,
                 result,
-                ARBVars{rhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (unary)"
-        ));
+                ARBVars{logic0, rhs_expression_sequence.resultVar()},
+                "EXPRESSION (unary -)")); break;
+			case '!': sequence.push(ARBInstruction(
+                ARBInstID::SUB,
+                result,
+                ARBVars{rhs_expression_sequence.resultVar(), logic1}));
+				
+				sequence.push(ARBInstruction(
+                ARBInstID::CMP,
+                result,
+                ARBVars{result, logic1, logic0},
+                "EXPRESSION (unary !)")); break;
+		}
     }
 
     return sequence;
