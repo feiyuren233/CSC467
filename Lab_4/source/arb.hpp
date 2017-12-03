@@ -12,9 +12,9 @@
 class ARBVar
 {
 public:
-    ARBVar(); //Temp variable
+    ARBVar(int index = -1); //Temp variable
     ARBVar(float val); //Literal
-    ARBVar(std::string declared_name); //Declared variable
+    ARBVar(std::string declared_name, int index = -1); //Declared variable
 
     std::string id() { return m_ID; }
     bool empty() { return m_ID.empty(); }
@@ -32,7 +32,7 @@ typedef std::vector<ARBVar> ARBVars;
 enum class ARBInstID {
     ABS, ADD, CMP, COS, DP3, DP4, DPH, DST, EX2, FLR, FRC, KIL,
     LG2, LIT, LRP, MAD, MAX, MIN, MOV, MUL, POW, RCP, RSQ, SCS,
-    SGE, SIN, SLT, SUB, SWZ, TEX, TXB, TXP, XPD, TEMP,
+    SGE, SIN, SLT, SUB, SWZ, TEX, TXB, TXP, XPD, TEMP, PARAM,
     EMPTY
 };
 
@@ -76,7 +76,7 @@ public:
     void setResultVar(ARBVar _result) { m_resultVar = _result; }
     ARBVar resultVar() { return m_resultVar; }
 
-    bool empty() { return m_instructions.empty(); }
+    bool empty() { return m_instructions.empty() && m_resultVar.empty(); }
 
 private:
     ARBVar m_resultVar;

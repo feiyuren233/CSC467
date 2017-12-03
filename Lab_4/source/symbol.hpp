@@ -49,7 +49,7 @@ public:
     std::ostream& write(std::ostream& os) const;
 
     void setUniqueID(const std::string& unique_id) { m_uniqueID = unique_id; }
-    std::string uniqueID() { return m_uniqueID; }
+    std::string uniqueID() { return m_uniqueID.empty()? m_ID : m_uniqueID; }
 
 private:
     bool m_isConst;

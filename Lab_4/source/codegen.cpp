@@ -163,7 +163,16 @@ ARBInstructionSequence LiteralExpression::genCode() {
 
 ARBInstructionSequence OtherExpression::genCode() {
     ARBInstructionSequence sequence;
-
-    //TODO: implement!
+    if (m_expression) { //(expression)
+        ARBInstructionSequence expression_sequence = m_expression->genCode();
+        sequence.push(expression_sequence);
+        sequence.setResultVar(expression_sequence.resultVar());
+    }
+    else if (m_variable) { //variable
+        sequence.setResultVar(IDToARBVar(m_variable->id(), m_variable->hasIndex()? m_variable->index() : -1));
+    }
+    else if (m_arguments) { //function call or constructor
+        //TODO: implement!
+    }
     return sequence;
 }

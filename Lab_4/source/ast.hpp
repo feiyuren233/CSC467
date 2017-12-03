@@ -69,7 +69,7 @@ protected:
     std::string m_parserText;
 
     //Facilities for code generation
-    ARBVar IDToARBVar(std::string _id) const;
+    ARBVar IDToARBVar(std::string _id, int index = -1) const;
 };
 
 // Scope-------------------------------------------
@@ -298,6 +298,8 @@ public:
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
+    bool hasIndex() { return m_isIndexPresent; }
+    int index() { return m_index; }
 private:
     const std::string m_ID;
     int m_index;

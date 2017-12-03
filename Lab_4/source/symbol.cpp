@@ -84,13 +84,9 @@ bool SymbolTable::findElementInCurrentScope(const std::string &_ID) {
 }
 
 void SymbolTable::pushElement(Symbol element) {
-    if (findSpecial(element.id())) {
-        element.setUniqueID(element.id());
-    } else {
-        std::stringstream address;
-        address << static_cast<const void *>(m_currentScopeID);
-        element.setUniqueID(element.id() + "_" + address.str());
-    }
+    std::stringstream address;
+    address << static_cast<const void *>(m_currentScopeID);
+    element.setUniqueID(element.id() + "_" + address.str());
     currentScope()[element.id()] = element;
 }
 
