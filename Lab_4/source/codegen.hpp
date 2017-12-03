@@ -11,4 +11,8 @@
 
 int genCode(Node* ast);
 
+
+//AST genCode definitions --------------------------------------------------
+ARBInstructionSequence concatenateCode(Node* a, Node* b);
+
 #endif //CODEGEN_H

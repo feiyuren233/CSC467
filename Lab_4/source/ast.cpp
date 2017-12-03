@@ -64,6 +64,11 @@ std::string Node::semanticErrorHeader() const {
     return "\n\n" + std::to_string(m_parserLineNum) + ": " + m_parserText + "\n";
 }
 
+// Facilities for code generation
+ARBVar Node::IDToARBVar(std::string _id) {
+    return ARBVar(m_symbolTable.getElementInStack(_id).uniqueID());
+}
+
 
 // Scope-------------------------------------------
 Scope::Scope(Declarations *declarations, Statements *statements)

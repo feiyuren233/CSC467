@@ -12,13 +12,18 @@
 class ARBVar
 {
 public:
-    ARBVar();
-    ARBVar(std::string pre_defined_id);
+    ARBVar(); //Temp variable
+    ARBVar(float val); //Literal
+    ARBVar(std::string declared_name); //Declared variable
+
     std::string id() { return m_ID; }
     bool empty() { return m_ID.empty(); }
+    bool isLiteral() { return m_isLiteral; }
 
 private:
     std::string m_ID;
+    bool m_isLiteral;
+
     static int m_uniqueID;
     static const std::map<std::string, std::string> m_preDefinedID_to_ARBID;
 };
@@ -27,7 +32,7 @@ typedef std::vector<ARBVar> ARBVars;
 enum class ARBInstID {
     ABS, ADD, CMP, COS, DP3, DP4, DPH, DST, EX2, FLR, FRC, KIL,
     LG2, LIT, LRP, MAD, MAX, MIN, MOV, MUL, POW, RCP, RSQ, SCS,
-    SGE, SIN, SLT, SUB, SWZ, TEX, TXB, TXP, XPD,
+    SGE, SIN, SLT, SUB, SWZ, TEX, TXB, TXP, XPD, TEMP,
     UNKNOWN //debugging
 };
 
@@ -41,6 +46,8 @@ public:
     ARBVar resultVar() { return m_resultVar; }
     ARBVars argVars() { return m_argumentVars; }
 
+    ARBVar changeResultVar(ARBVar _new_result);
+
 private:
     ARBInstID m_ID;
     ARBVar m_resultVar;
@@ -52,12 +59,16 @@ typedef std::vector<ARBInstruction> ARBInstructions;
 class ARBInstructionSequence
 {
 public:
-    const ARBInstructions& instructions() { return m_instructions; }
-    ARBInstructionSequence& push(ARBInstruction& instruction);
-    ARBInstructionSequence& push(ARBInstructions& instructions);
-    ARBInstructionSequence& push(ARBInstructionSequence& instruction_sequence);
+    ARBInstructions& instructions() { return m_instructions; }
+    ARBInstructionSequence& push(const ARBInstruction& instruction);
+    ARBInstructionSequence& push(const ARBInstructions& instructions);
+    ARBInstructionSequence& push(const ARBInstructionSequence& instruction_sequence);
+
+    void setResultVar(ARBVar _result) { m_resultVar = _result; }
+    ARBVar resultVar() { return m_resultVar; }
 
 private:
+    ARBVar m_resultVar;
     std::vector<ARBInstruction> m_instructions;
 };
 

@@ -67,6 +67,9 @@ protected:
     //unsigned long m_parserTextNum;
     //std::string m_parserLine;
     std::string m_parserText;
+
+    //Facilities for code generation
+    ARBVar IDToARBVar(std::string _id);
 };
 
 // Scope-------------------------------------------
@@ -79,6 +82,8 @@ public:
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+
+    virtual ARBInstructionSequence genCode();
 
 private:
     Declarations* m_declarations;
@@ -96,6 +101,8 @@ public:
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
+    virtual ARBInstructionSequence genCode();
+
 private:
     Declarations* m_declarations;
     Declaration* m_declaration;
@@ -112,6 +119,8 @@ public:
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
+    virtual ARBInstructionSequence genCode();
+
 private:
     Statements* m_statements;
     Statement* m_statement;
@@ -127,6 +136,8 @@ public:
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+
+    virtual ARBInstructionSequence genCode();
 
 private:
     bool m_isConst;
@@ -147,6 +158,8 @@ public:
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+
+    virtual ARBInstructionSequence genCode();
 
 private:
     Scope* m_scope;
@@ -206,6 +219,8 @@ public:
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
+    virtual ARBInstructionSequence genCode();
+
 private:
     Expression* m_lhs;
     Expression* m_rhs;
@@ -224,6 +239,8 @@ public:
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+
+    virtual ARBInstructionSequence genCode();
 
 private:
     bool m_isBool;
@@ -249,6 +266,8 @@ public:
 
     virtual std::ostream& populateSymbolTableAndCheckErrors(std::ostream &os);
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
+
+    virtual ARBInstructionSequence genCode();
 
 private:
     Expression* m_expression;
