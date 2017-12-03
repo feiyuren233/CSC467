@@ -183,17 +183,17 @@ ARBInstructionSequence OperationExpression::genCode() {
                 ARBInstID::ADD,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break;
+                "EXPRESSION (binary +)")); break;
 			case '-': sequence.push(ARBInstruction(
                 ARBInstID::SUB,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break;;
+                "EXPRESSION (binary -)")); break;;
 			case '*': sequence.push(ARBInstruction(
                 ARBInstID::MUL,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break;
+                "EXPRESSION (binary *)")); break;
 			case '/': sequence.push(ARBInstruction(
                 ARBInstID::RCP,
                 result,
@@ -203,32 +203,32 @@ ARBInstructionSequence OperationExpression::genCode() {
                 ARBInstID::MUL,
                 result2,
                 ARBVars{lhs_expression_sequence.resultVar(), result},
-                "EXPRESSION (binary)")); break;
+                "EXPRESSION (binary /)")); break;
 			case '^': sequence.push(ARBInstruction(
                 ARBInstID::POW,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break;
+                "EXPRESSION (binary ^)")); break;
 			case '<': sequence.push(ARBInstruction(
                 ARBInstID::SLT,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break; 
+                "EXPRESSION (binary <)")); break; 
 			case LEQ: sequence.push(ARBInstruction(
                 ARBInstID::SGE,
                 result,
                 ARBVars{rhs_expression_sequence.resultVar(), lhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break;			
+                "EXPRESSION (binary <=)")); break;			
 			case '>': sequence.push(ARBInstruction(
                 ARBInstID::SLT,
                 result,
                 ARBVars{rhs_expression_sequence.resultVar(), lhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break; 
+                "EXPRESSION (binary >)")); break; 
 			case GEQ: sequence.push(ARBInstruction(
                 ARBInstID::SGE,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)")); break;
+                "EXPRESSION (binary >=)")); break;
 			case AND: sequence.push(ARBInstruction(
                 ARBInstID::ADD,
                 result,
@@ -243,8 +243,72 @@ ARBInstructionSequence OperationExpression::genCode() {
                 ARBInstID::CMP,
                 result,
                 ARBVars{result2, logic0, logic1},
-                "EXPRESSION (binary)")); break;
-			
+                "EXPRESSION (binary &&)")); break;
+			case OR: sequence.push(ARBInstruction(
+                ARBInstID::ADD,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::SUB,
+                result2,
+                ARBVars{result, logic1}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::CMP,
+                result,
+                ARBVars{result2, logic0, logic1},
+                "EXPRESSION (binary ||)")); break;
+			case EQ: sequence.push(ARBInstruction(
+                ARBInstID::SGE,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::SGE,
+                result2,
+                ARBVars{rhs_expression_sequence.resultVar(), lhs_expression_sequence.resultVar()}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::ADD,
+                result,
+                ARBVars{result, result2}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::SUB, 
+                result2,
+                ARBVars{result, onep1}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::CMP,
+                result,
+                ARBVars{result2, logic0, logic1},
+                "EXPRESSION (binary ==)")); break;
+			case NEQ: sequence.push(ARBInstruction(
+                ARBInstID::SGE,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::SGE,
+                result2,
+                ARBVars{rhs_expression_sequence.resultVar(), lhs_expression_sequence.resultVar()}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::ADD,
+                result,
+                ARBVars{result, result2}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::SUB, 
+                result2,
+                ARBVars{result, onep1}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::CMP,
+                result,
+                ARBVars{result2, logic1, logic0},
+                "EXPRESSION (binary !=)")); break;			
 		}
 		
         
