@@ -57,6 +57,8 @@ std::string ARBInstruction::to_string() {
     for (auto var : m_argumentVars)
         inst += (", " + var.id());
     inst += ";";
+    if (!m_comment.empty())
+        inst += (" # " + m_comment);
     return inst;
 }
 

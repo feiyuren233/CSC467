@@ -46,12 +46,14 @@ ARBInstructionSequence Declaration::genCode() {
     sequence.push(ARBInstruction(
             ARBInstID::TEMP,
             declared_var,
-            ARBVars()
+            ARBVars(),
+            "variable declaration"
     ));
     sequence.push(ARBInstruction(
             ARBInstID::MOV,
             declared_var,
-            ARBVars{expression_result_seq.resultVar()}
+            ARBVars{expression_result_seq.resultVar()},
+            "moving expression value to declared variable"
     ));
     return sequence;
 }
@@ -69,9 +71,9 @@ ARBInstructionSequence Statement::genCode() {
         sequence.push(ARBInstruction(
                 ARBInstID::MOV,
                 IDToARBVar(m_variable->id()),
-                ARBVars{expression_sequence.resultVar()}
-                      )
-        );
+                ARBVars{expression_sequence.resultVar()},
+                "variable = expression"
+        ));
         return sequence;
     }
     else if (m_expression && m_statement) { //if statement
@@ -88,9 +90,10 @@ ARBInstructionSequence Statement::genCode() {
             ARBVar result = instruction.changeResultVar(temp);
             sequence.push(instruction);
             sequence.push(ARBInstruction(
-                ARBInstID::CMP,
-                result,
-                ARBVars{condition, result, temp}
+                    ARBInstID::CMP,
+                    result,
+                    ARBVars{condition, result, temp},
+                    "if statement correction on condition"
             ));
         }
 
@@ -100,7 +103,8 @@ ARBInstructionSequence Statement::genCode() {
             sequence.push(ARBInstruction(
                     ARBInstID::CMP,
                     result,
-                    ARBVars{condition, temp, result}
+                    ARBVars{condition, temp, result},
+                    "else statement correction on condition"
             ));
         };
 
@@ -123,14 +127,16 @@ ARBInstructionSequence OperationExpression::genCode() {
         sequence.push(ARBInstruction(
                 ARBInstID::ADD,
                 result,
-                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()}
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
+                "Binary expression"
         ));
     } else { //Unary operation
         //TODO: implement!
         sequence.push(ARBInstruction(
                 ARBInstID::ADD,
                 result,
-                ARBVars{rhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()}
+                ARBVars{rhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
+                "Unary expression"
         ));
     }
 
@@ -146,7 +152,8 @@ ARBInstructionSequence LiteralExpression::genCode() {
     sequence.push(ARBInstruction(
             ARBInstID::MOV,
             result,
-            ARBVars{ARBVar(m_valFloat)}
+            ARBVars{ARBVar(m_valFloat)},
+            "Literal definition"
     ));
     return sequence;
 }

@@ -39,8 +39,8 @@ enum class ARBInstID {
 class ARBInstruction
 {
 public:
-    ARBInstruction(ARBInstID _id, ARBVar _result, ARBVars _arguments)
-            :m_ID(_id), m_resultVar(_result), m_argumentVars(_arguments) {}
+    ARBInstruction(ARBInstID _id, ARBVar _result, ARBVars _arguments, std::string comment = "")
+            :m_ID(_id), m_resultVar(_result), m_argumentVars(_arguments), m_comment(comment) {}
 
     ARBInstID id() { return m_ID; }
     ARBVar resultVar() { return m_resultVar; }
@@ -54,6 +54,7 @@ private:
     ARBInstID m_ID;
     ARBVar m_resultVar;
     std::vector<ARBVar> m_argumentVars;
+    std::string m_comment;
 
     static const std::map<ARBInstID, std::string> m_ARBInstId_to_string;
 };
