@@ -3,16 +3,24 @@
 //
 
 #include "codegen.hpp"
+#include "common.h"
+#include <sstream>
 
 int genCode(Node* ast)
 {
     ARBInstructionSequence instr_sequence = ast->genCode();
     ARBInstructionSequence declaration_sequence = genTempVariableDeclarations(instr_sequence);
 
-    //TODO: Implement printing to file
+    std::stringstream output_ss;
+    output_ss << "!!ARBfp1.0" << std::endl;
+
     for (auto instruction : declaration_sequence.push(instr_sequence).instructions())
-        std::cout << instruction.to_string() << std::endl;
-    return 1;
+         output_ss << instruction.to_string() << std::endl;
+
+    output_ss << "END" << std::endl;
+
+    fprintf(outputFile, output_ss.str().c_str());
+    return 0;
 }
 
 ARBInstructionSequence genTempVariableDeclarations(ARBInstructionSequence& sequence)
