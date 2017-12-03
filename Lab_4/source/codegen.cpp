@@ -49,12 +49,15 @@ ARBInstructionSequence Declaration::genCode() {
             ARBVars(),
             "variable declaration"
     ));
-    sequence.push(ARBInstruction(
-            ARBInstID::MOV,
-            declared_var,
-            ARBVars{expression_result_seq.resultVar()},
-            "moving expression value to declared variable"
-    ));
+
+    if (!expression_result_seq.empty())
+        sequence.push(ARBInstruction(
+                ARBInstID::MOV,
+                declared_var,
+                ARBVars{expression_result_seq.resultVar()},
+                "moving expression value to declared variable"
+        ));
+
     return sequence;
 }
 

@@ -33,12 +33,14 @@ enum class ARBInstID {
     ABS, ADD, CMP, COS, DP3, DP4, DPH, DST, EX2, FLR, FRC, KIL,
     LG2, LIT, LRP, MAD, MAX, MIN, MOV, MUL, POW, RCP, RSQ, SCS,
     SGE, SIN, SLT, SUB, SWZ, TEX, TXB, TXP, XPD, TEMP,
-    UNKNOWN //debugging
+    EMPTY
 };
 
 class ARBInstruction
 {
 public:
+    ARBInstruction()
+            :m_ID(ARBInstID::EMPTY) {}
     ARBInstruction(ARBInstID _id, ARBVar _result, ARBVars _arguments, std::string comment = "")
             :m_ID(_id), m_resultVar(_result), m_argumentVars(_arguments), m_comment(comment) {}
 
@@ -49,6 +51,8 @@ public:
     ARBVar changeResultVar(ARBVar _new_result);
 
     std::string to_string();
+
+    bool empty() { return m_ID == ARBInstID::EMPTY; }
 
 private:
     ARBInstID m_ID;
@@ -71,6 +75,8 @@ public:
 
     void setResultVar(ARBVar _result) { m_resultVar = _result; }
     ARBVar resultVar() { return m_resultVar; }
+
+    bool empty() { return m_instructions.empty(); }
 
 private:
     ARBVar m_resultVar;
