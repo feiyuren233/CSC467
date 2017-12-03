@@ -1,0 +1,20 @@
+!!ARBfp1.0
+TEMP tempVar0;
+TEMP tempVar3;
+TEMP tempVar5;
+TEMP temp_0x559ee42d9e10; # DECLARATION
+MOV tempVar0, 0.000000; # LITERAL
+MUL tempVar5, fragment.color.x, fragment.position.x; # EXPRESSION (binary)
+CMP temp_0x559ee42d9e10.x, tempVar0, temp_0x559ee42d9e10.x, tempVar5; # IF
+MUL tempVar5, fragment.color.y, fragment.position.y; # EXPRESSION (binary)
+CMP temp_0x559ee42d9e10.y, tempVar0, temp_0x559ee42d9e10.y, tempVar5; # IF
+MOV tempVar5, fragment.color.z; # ASSIGNMENT
+CMP temp_0x559ee42d9e10.z, tempVar0, temp_0x559ee42d9e10.z, tempVar5; # IF
+MUL tempVar5, fragment.color.w, fragment.position.x; # EXPRESSION (binary)
+CMP tempVar3, tempVar0, tempVar3, tempVar5; # IF
+MUL tempVar5, tempVar3, fragment.position.y; # EXPRESSION (binary)
+CMP temp_0x559ee42d9e10.w, tempVar0, temp_0x559ee42d9e10.w, tempVar5; # IF
+MOV tempVar5, fragment.color; # ASSIGNMENT
+CMP temp_0x559ee42d9e10, tempVar0, tempVar5, temp_0x559ee42d9e10; # ELSE
+MOV result.color, temp_0x559ee42d9e10; # ASSIGNMENT
+END

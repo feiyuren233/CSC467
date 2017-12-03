@@ -114,7 +114,7 @@ SymbolScope SymbolTable::m_preDefinedSpecials {
         {"gl_FragDepth", Symbol(false, "gl_FragDepth", Type(BOOL_T), Symbol::RESULT)},
         {"gl_FragCoord", Symbol(false, "gl_FragCoord", Type(VEC_T, 4), Symbol::RESULT)},
 
-        {"gl_TextCoord", Symbol(false, "gl_TextCoord", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
+        {"gl_TexCoord", Symbol(false, "gl_TexCoord", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
         {"gl_Color", Symbol(false, "gl_Color", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
         {"gl_Secondary", Symbol(false, "gl_Secondary", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
         {"gl_FogFragCoord", Symbol(false, "gl_FogFragCoord", Type(VEC_T, 4), Symbol::ATTRIBUTE)},
