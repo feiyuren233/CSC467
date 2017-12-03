@@ -4,6 +4,7 @@
 
 #include "codegen.hpp"
 #include "common.h"
+#include "parser.h"
 #include <sstream>
 
 int genCode(Node* ast)
@@ -163,16 +164,55 @@ ARBInstructionSequence OperationExpression::genCode() {
     sequence.push(rhs_expression_sequence);
 
     ARBVar result = ARBVar::makeTemp();
+    ARBVar result2 = ARBVar::makeTemp();
     sequence.setResultVar(result);
 
     if (m_lhs && m_rhs) { //Binary operation
         //TODO: implement!
-        sequence.push(ARBInstruction(
+		switch(m_operator){
+			case '+': sequence.push(ARBInstruction(
+                ARBInstID::ADD,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
+                "EXPRESSION (binary)")); break;
+			case '-': sequence.push(ARBInstruction(
+                ARBInstID::SUB,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
+                "EXPRESSION (binary)")); break;;
+			case '*': sequence.push(ARBInstruction(
                 ARBInstID::MUL,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
-                "EXPRESSION (binary)"
-        ));
+                "EXPRESSION (binary)")); break;
+			case '/': sequence.push(ARBInstruction(
+                ARBInstID::RCP,
+                result,
+                ARBVars{rhs_expression_sequence.resultVar()}));//rhs^-1
+				
+				sequence.push(ARBInstruction(
+                ARBInstID::MUL,
+                result2,
+                ARBVars{lhs_expression_sequence.resultVar(), result},
+                "EXPRESSION (binary)")); break;
+			case '^': sequence.push(ARBInstruction(
+                ARBInstID::POW,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
+                "EXPRESSION (binary)")); break;
+			case '<': sequence.push(ARBInstruction(
+                ARBInstID::SLT,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
+                "EXPRESSION (binary)")); break; 
+			case GEQ: sequence.push(ARBInstruction(
+                ARBInstID::SGE,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
+                "EXPRESSION (binary)")); break;
+		}
+		
+        
     } else { //Unary operation
         //TODO: implement!
         sequence.push(ARBInstruction(
