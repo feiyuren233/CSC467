@@ -24,7 +24,7 @@ private:
     std::string m_ID;
     bool m_isLiteral;
 
-    static int m_uniqueID;
+    static int m_uniqueIDCount;
     static const std::map<std::string, std::string> m_preDefinedID_to_ARBID;
 };
 typedef std::vector<ARBVar> ARBVars;

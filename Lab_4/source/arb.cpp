@@ -4,7 +4,7 @@
 
 #include "arb.hpp"
 
-int ARBVar::m_uniqueID = 0;
+int ARBVar::m_uniqueIDCount = 0;
 
 const std::map<std::string, std::string> ARBVar::m_preDefinedID_to_ARBID {
         {"gl_FragColor", "result.color"},
@@ -23,7 +23,7 @@ const std::map<std::string, std::string> ARBVar::m_preDefinedID_to_ARBID {
 };
 
 ARBVar::ARBVar()
-        :m_ID("temp_var_" + std::to_string(m_uniqueID++)), m_isLiteral(false) {}
+        :m_ID("temp_var_" + std::to_string(m_uniqueIDCount++)), m_isLiteral(false) {}
 
 ARBVar::ARBVar(float val)
         :m_ID(std::to_string(val)), m_isLiteral(true) {}
@@ -33,7 +33,7 @@ ARBVar::ARBVar(std::string declared_name) :m_isLiteral(false)
     if (m_preDefinedID_to_ARBID.find(declared_name) != m_preDefinedID_to_ARBID.end()) {
         m_ID = m_preDefinedID_to_ARBID.at(declared_name);
     } else {
-        m_ID = m_uniqueID;
+        m_ID = declared_name;
     }
 }
 

@@ -65,7 +65,7 @@ std::string Node::semanticErrorHeader() const {
 }
 
 // Facilities for code generation
-ARBVar Node::IDToARBVar(std::string _id) {
+ARBVar Node::IDToARBVar(std::string _id) const {
     return ARBVar(m_symbolTable.getElementInStack(_id).uniqueID());
 }
 

@@ -69,7 +69,7 @@ protected:
     std::string m_parserText;
 
     //Facilities for code generation
-    ARBVar IDToARBVar(std::string _id);
+    ARBVar IDToARBVar(std::string _id) const;
 };
 
 // Scope-------------------------------------------

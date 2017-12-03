@@ -89,7 +89,7 @@ void SymbolTable::pushElement(Symbol element) {
     } else {
         std::stringstream address;
         address << static_cast<const void *>(m_currentScopeID);
-        element.setUniqueID("unique_" + address.str() + "_" + element.id());
+        element.setUniqueID(element.id() + "_" + address.str());
     }
     currentScope()[element.id()] = element;
 }
