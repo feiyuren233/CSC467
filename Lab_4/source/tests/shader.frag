@@ -1,7 +1,9 @@
 
 { 
    vec4 temp;
-if (true){
+   bool cond1 = true;
+   bool cond2 = true;
+if (cond1 && cond2){
    temp[0] = gl_Color[0] * gl_FragCoord[0];
    temp[1] = gl_Color[1] * gl_FragCoord[1];
    temp[2] = gl_Color[2];
