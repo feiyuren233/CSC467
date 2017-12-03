@@ -171,6 +171,9 @@ ARBInstructionSequence OperationExpression::genCode() {
 
     ARBVar result = ARBVar::makeTemp();
     ARBVar result2 = ARBVar::makeTemp();
+	ARBVar onep1 = ARBVar(1.1);
+	ARBVar logic0 = ARBVar(0);
+	ARBVar logic1 = ARBVar(1);
     sequence.setResultVar(result);
 
     if (m_lhs && m_rhs) { //Binary operation
@@ -211,11 +214,37 @@ ARBInstructionSequence OperationExpression::genCode() {
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
                 "EXPRESSION (binary)")); break; 
+			case LEQ: sequence.push(ARBInstruction(
+                ARBInstID::SGE,
+                result,
+                ARBVars{rhs_expression_sequence.resultVar(), lhs_expression_sequence.resultVar()},
+                "EXPRESSION (binary)")); break;			
+			case '>': sequence.push(ARBInstruction(
+                ARBInstID::SLT,
+                result,
+                ARBVars{rhs_expression_sequence.resultVar(), lhs_expression_sequence.resultVar()},
+                "EXPRESSION (binary)")); break; 
 			case GEQ: sequence.push(ARBInstruction(
                 ARBInstID::SGE,
                 result,
                 ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()},
                 "EXPRESSION (binary)")); break;
+			case AND: sequence.push(ARBInstruction(
+                ARBInstID::ADD,
+                result,
+                ARBVars{lhs_expression_sequence.resultVar(), rhs_expression_sequence.resultVar()}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::SUB,
+                result2,
+                ARBVars{result, onep1}));
+
+				sequence.push(ARBInstruction(
+                ARBInstID::CMP,
+                result,
+                ARBVars{result2, logic0, logic1},
+                "EXPRESSION (binary)")); break;
+			
 		}
 		
         
