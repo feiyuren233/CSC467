@@ -491,7 +491,10 @@ std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &o
         }
         m_isConstExpr = m_variable->isConstExpr();
     }
-    if (m_arguments) m_arguments->populateSymbolTableAndCheckErrors(os);
+    if (m_arguments) {
+        m_arguments->populateSymbolTableAndCheckErrors(os);
+        m_isConstExpr = m_arguments->isConstExpr();
+    }
     return os;
 }
 
