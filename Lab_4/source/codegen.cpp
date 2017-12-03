@@ -122,12 +122,18 @@ ARBInstructionSequence Statement::genCode() {
     }
     else if (m_expression && m_statement) { //if statement
         ARBInstructionSequence sequence;
-        ARBInstructionSequence expression_sequence = m_expression->genCode();
-        ARBVar condition = expression_sequence.resultVar();
+        ARBInstructionSequence condition_expression_sequence = m_expression->genCode();
+        ARBVar condition = condition_expression_sequence.resultVar();
         ARBInstructionSequence if_sequence = m_statement->genCode();
         ARBInstructionSequence else_sequence = m_elseStatement? m_elseStatement->genCode() : ARBInstructionSequence();
 
-        sequence.push(expression_sequence);
+        sequence.push(condition_expression_sequence);
+        sequence.push(ARBInstruction(
+                ARBInstID::MUL,
+                condition,
+                ARBVars{ARBVar(-1), condition},
+                "CONDITION"
+        ));
 
         ARBVar temp = ARBVar::makeTemp();
         for (auto instruction : if_sequence.instructions()) {
@@ -136,7 +142,7 @@ ARBInstructionSequence Statement::genCode() {
             sequence.push(ARBInstruction(
                     ARBInstID::CMP,
                     result,
-                    ARBVars{condition, result, temp},
+                    ARBVars{condition, temp, result},
                     "IF"
             ));
         }
@@ -147,7 +153,7 @@ ARBInstructionSequence Statement::genCode() {
             sequence.push(ARBInstruction(
                     ARBInstID::CMP,
                     result,
-                    ARBVars{condition, temp, result},
+                    ARBVars{condition, result, temp},
                     "ELSE"
             ));
         };
@@ -232,10 +238,18 @@ ARBInstructionSequence LiteralExpression::genCode() {
     ARBVar result = ARBVar::makeTemp();
     sequence.setResultVar(result);
 
+    ARBVar arg;
+    if (m_isBool)
+        arg = ARBVar(m_valBool? 1 : 0);
+    else if (m_isInt)
+        arg = ARBVar(float(m_valInt));
+    else if (m_isFloat)
+        arg = ARBVar(m_valFloat);
+
     sequence.push(ARBInstruction(
             ARBInstID::MOV,
             result,
-            ARBVars{ARBVar(m_valFloat)},
+            ARBVars{arg},
             "LITERAL"
     ));
     return sequence;
