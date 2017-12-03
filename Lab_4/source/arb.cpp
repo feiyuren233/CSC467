@@ -23,12 +23,15 @@ const std::map<std::string, std::string> ARBVar::m_preDefinedID_to_ARBID {
 };
 
 ARBVar::ARBVar(int index)
-        :m_ID("tempVar" + std::to_string(m_uniqueIDCount++)), m_isLiteral(false) {}
+        :m_ID("tempVar" + std::to_string(m_uniqueIDCount++)), m_isLiteral(false),
+         m_isTemp(true), m_tempID(m_uniqueIDCount) {}
 
 ARBVar::ARBVar(float val)
-        :m_ID(std::to_string(val)), m_isLiteral(true) {}
+        :m_ID(std::to_string(val)), m_isLiteral(true),
+         m_isTemp(false), m_tempID(-1) {}
 
-ARBVar::ARBVar(std::string declared_name, int index) :m_isLiteral(false)
+ARBVar::ARBVar(std::string declared_name, int index)
+        :m_isLiteral(false), m_isTemp(false), m_tempID(-1)
 {
     if (m_preDefinedID_to_ARBID.find(declared_name) != m_preDefinedID_to_ARBID.end()) {
         m_ID = m_preDefinedID_to_ARBID.at(declared_name);

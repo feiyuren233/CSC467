@@ -19,10 +19,14 @@ public:
     std::string id() { return m_ID; }
     bool empty() { return m_ID.empty(); }
     bool isLiteral() { return m_isLiteral; }
+    bool isTemp() { return m_isTemp; }
+    int tempID() { return m_tempID; }
 
 private:
     std::string m_ID;
     bool m_isLiteral;
+    bool m_isTemp;
+    int m_tempID;
 
     static int m_uniqueIDCount;
     static const std::map<std::string, std::string> m_preDefinedID_to_ARBID;
