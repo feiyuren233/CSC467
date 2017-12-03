@@ -66,7 +66,7 @@ private:
     std::vector<ARBVar> m_argumentVars;
     std::string m_comment;
 
-    static const std::map<ARBInstID, std::string> m_ARBInstId_to_string;
+    static const std::map<ARBInstID, std::string> m_ARBInstID_to_string;
 };
 typedef std::vector<ARBInstruction> ARBInstructions;
 

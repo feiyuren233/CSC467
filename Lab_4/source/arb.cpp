@@ -54,13 +54,17 @@ ARBVar ARBVar::makeTemp(int index)
 }
 
 
-const std::map<ARBInstID, std::string> ARBInstruction::m_ARBInstId_to_string {
-        {ARBInstID::ADD, "ADD"},
-        {ARBInstID::CMP, "CMP"},
-        {ARBInstID::MOV, "MOV"},
-        {ARBInstID::TEMP, "TEMP"},
-        {ARBInstID::MUL, "MUL"}
-        //TODO: complete this map
+const std::map<ARBInstID, std::string> ARBInstruction::m_ARBInstID_to_string {
+        {ARBInstID::ABS, "ABS"}, {ARBInstID::ADD, "ADD"}, {ARBInstID::CMP, "CMP"}, {ARBInstID::COS, "COS"},
+        {ARBInstID::DP3, "DP3"}, {ARBInstID::DP4, "DP4"}, {ARBInstID::DPH, "DPH"}, {ARBInstID::DST, "DST"},
+        {ARBInstID::EX2, "EX2"}, {ARBInstID::FLR, "FLR"}, {ARBInstID::FRC, "FRC"}, {ARBInstID::KIL, "KIL"},
+        {ARBInstID::LG2, "LG2"}, {ARBInstID::LIT, "LIT"}, {ARBInstID::LRP, "LRP"}, {ARBInstID::MAD, "MAD"},
+        {ARBInstID::MAX, "MAX"}, {ARBInstID::MIN, "MIN"}, {ARBInstID::MOV, "MOV"}, {ARBInstID::MUL, "MUL"},
+        {ARBInstID::POW, "POW"}, {ARBInstID::RCP, "RCP"}, {ARBInstID::RSQ, "RSQ"}, {ARBInstID::SCS, "SCS"},
+        {ARBInstID::SGE, "SGE"}, {ARBInstID::SIN, "SIN"}, {ARBInstID::SLT, "SLT"}, {ARBInstID::SUB, "SUB"},
+        {ARBInstID::SWZ, "SWZ"}, {ARBInstID::TEX, "TEX"}, {ARBInstID::TXB, "TXB"}, {ARBInstID::TXP, "TXP"},
+        {ARBInstID::XPD, "XPD"}, {ARBInstID ::TEMP, "TEMP"}, {ARBInstID ::PARAM, "PARAM"},
+        {ARBInstID::EMPTY, "EMPTY"}
 };
 
 ARBVar ARBInstruction::changeResultVar(ARBVar _new_result) {
@@ -70,7 +74,7 @@ ARBVar ARBInstruction::changeResultVar(ARBVar _new_result) {
 }
 
 std::string ARBInstruction::to_string() {
-    std::string inst = m_ARBInstId_to_string.at(m_ID) + " " + m_resultVar.id();
+    std::string inst = m_ARBInstID_to_string.at(m_ID) + " " + m_resultVar.id();
     for (auto var : m_argumentVars)
         inst += (", " + var.id());
     inst += ";";
