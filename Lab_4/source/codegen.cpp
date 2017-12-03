@@ -256,7 +256,6 @@ ARBInstructionSequence OtherExpression::genCode() {
             //TODO: implement!
         } else
         { //function call
-            ARBInstructionSequence sequence;
             ARBVar result = ARBVar::makeTemp();
             std::vector<Expression*> expressions = m_arguments->generateExpressionVec();
             ARBVars arguments;
