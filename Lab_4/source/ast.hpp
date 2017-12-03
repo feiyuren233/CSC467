@@ -70,6 +70,7 @@ protected:
 
     //Facilities for code generation
     ARBVar IDToARBVar(std::string _id, int index = -1) const;
+    static const std::map<int, ARBInstID> m_Op_to_ARBInstID;
 };
 
 // Scope-------------------------------------------
@@ -281,7 +282,8 @@ private:
         LIT = 1,
         RSQ = 2
     };
-    static std::map<int, std::string> m_func_to_string;
+    static const std::map<int, std::string> m_func_to_string;
+    static const std::map<int, ARBInstID> m_func_to_ARBInstID;
 };
 
 // Variable----------------------------------------
@@ -319,6 +321,7 @@ public:
     virtual std::ostream& populateTypeAndCheckErrors(std::ostream& os);
 
     int numArgs() const { return m_numExpressions; }
+    std::vector<Expression*> generateExpressionVec() const;
 
 private:
     int m_numExpressions;

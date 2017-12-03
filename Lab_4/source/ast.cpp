@@ -431,7 +431,13 @@ std::ostream& LiteralExpression::populateTypeAndCheckErrors(std::ostream &os) {
 }
 
 
-std::map<int, std::string> OtherExpression::m_func_to_string{{DP3, "dp3"}, {LIT, "lit"}, {RSQ, "rsq"}};
+const std::map<int, std::string> OtherExpression::m_func_to_string{
+        {DP3, "dp3"}, {LIT, "lit"}, {RSQ, "rsq"}
+};
+
+const std::map<int, ARBInstID> OtherExpression::m_func_to_ARBInstID{
+        {RSQ, ARBInstID::RSQ}, {DP3, ARBInstID::DP3}, {LIT, ARBInstID::LIT}
+};
 
 OtherExpression::OtherExpression(Expression* expression)
         :m_expression(expression),
@@ -464,7 +470,7 @@ std::ostream& OtherExpression::write(std::ostream &os) const {
     else if (m_typeNode)
         return os << "(CALL " << m_typeNode << " " << m_arguments << ")";
     else
-        return os << "(CALL " << m_func_to_string[m_func] << " " << m_arguments << ")";
+        return os << "(CALL " << m_func_to_string.at(m_func) << " " << m_arguments << ")";
 }
 
 std::ostream& OtherExpression::populateSymbolTableAndCheckErrors(std::ostream &os) {
@@ -660,6 +666,14 @@ std::ostream& Arguments::populateTypeAndCheckErrors(std::ostream &os) {
     return os;
 }
 
+std::vector<Expression*> Arguments::generateExpressionVec() const {
+    std::vector<Expression*> expressions;
+    if (m_arguments)
+        expressions = m_arguments->generateExpressionVec();
+    if (m_expression)
+        expressions.push_back(m_expression);
+    return expressions;
+}
 
 
 bool exactEqual(Type a, Type b) {

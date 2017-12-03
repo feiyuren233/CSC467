@@ -212,7 +212,28 @@ ARBInstructionSequence OtherExpression::genCode() {
         sequence.setResultVar(IDToARBVar(m_variable->id(), m_variable->hasIndex()? m_variable->index() : -1));
     }
     else if (m_arguments) { //function call or constructor
-        //TODO: implement!
+        if (m_typeNode) { //type (arguments_opt)
+            //TODO: implement!
+        } else
+        { //function call
+            ARBInstructionSequence sequence;
+            ARBVar result = ARBVar::makeTemp();
+            std::vector<Expression*> expressions = m_arguments->generateExpressionVec();
+            ARBVars arguments;
+
+            for (auto expression : expressions ) {
+                ARBInstructionSequence expression_sequence = expression->genCode();
+                sequence.push(expression_sequence);
+                arguments.push_back(expression_sequence.resultVar());
+            }
+
+            sequence.push(ARBInstruction(
+                    m_func_to_ARBInstID.at(m_func),
+                    result,
+                    arguments,
+                    "FUNCTION CALL"
+            ));
+        }
     }
     return sequence;
 }
