@@ -370,10 +370,9 @@ ARBInstructionSequence OtherExpression::genCode() {
     }
     else if (m_arguments) { //function call or constructor
         if (m_typeNode) { //type (arguments_opt)
-            //TODO: implement!
             ARBVar result = ARBVar::makeTemp();
             std::vector<Expression*> expressions = m_arguments->generateExpressionVec();
-
+            
             for (int i = 0; i < expressions.size(); i++) {
                 ARBInstructionSequence expression_sequence = expressions[i]->genCode();
                 sequence.push(expression_sequence);
@@ -384,6 +383,7 @@ ARBInstructionSequence OtherExpression::genCode() {
                         ARBVars{expression_sequence.resultVar()}
                 ));
             }
+            sequence.setResultVar(result);
         } else
         { //function call
             ARBVar result = ARBVar::makeTemp();
